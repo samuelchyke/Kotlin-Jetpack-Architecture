@@ -6,6 +6,7 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import com.example.kotlin_jetpack_architecture.R
+import com.example.kotlin_jetpack_architecture.models.AuthToken
 import com.example.kotlin_jetpack_architecture.ui.auth.state.LoginFields
 import kotlinx.android.synthetic.main.fragment_login.*
 
@@ -24,6 +25,14 @@ class LoginFragment : BaseAuthFragment() {
         Log.d(TAG, "LoginFragment: $viewModel")
         subscribeObservers()
 
+        login_button.setOnClickListener {
+            viewModel.setAuthToken(
+                AuthToken(
+                    1,
+                    "gdfngidfng4nt43n43jn34jn"
+                )
+            )
+        }
     }
 
     private fun subscribeObservers(){
