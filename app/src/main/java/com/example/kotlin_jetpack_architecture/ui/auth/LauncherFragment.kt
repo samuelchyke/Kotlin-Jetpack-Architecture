@@ -1,6 +1,7 @@
 package com.example.kotlin_jetpack_architecture.ui.auth
 
 import android.os.Bundle
+import android.util.Log
 import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
@@ -10,7 +11,7 @@ import com.example.kotlin_jetpack_architecture.R
 import kotlinx.android.synthetic.main.fragment_launcher.*
 
 
-class LauncherFragment : Fragment() {
+class LauncherFragment : BaseAuthFragment() {
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -35,6 +36,8 @@ class LauncherFragment : Fragment() {
             navForgotPassword()
         }
         focusable_view.requestFocus()
+
+        Log.d(TAG, "LauncherFragment: $viewModel")
     }
 
     private fun navForgotPassword() {

@@ -1,4 +1,4 @@
-package com.example.kotlin_jetpack_architecture.persistance
+package com.example.kotlin_jetpack_architecture.persistence
 
 import androidx.room.Database
 import androidx.room.RoomDatabase
