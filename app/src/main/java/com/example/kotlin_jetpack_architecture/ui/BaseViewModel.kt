@@ -36,5 +36,4 @@ abstract class BaseViewModel<StateEvent, ViewState>: ViewModel(){
 
     abstract fun initNewViewState(): ViewState
 
-
 }
