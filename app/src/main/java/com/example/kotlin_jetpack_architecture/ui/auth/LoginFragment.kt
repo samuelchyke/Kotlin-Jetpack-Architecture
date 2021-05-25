@@ -7,6 +7,8 @@ import android.view.View
 import android.view.ViewGroup
 import com.example.kotlin_jetpack_architecture.R
 import com.example.kotlin_jetpack_architecture.models.AuthToken
+import com.example.kotlin_jetpack_architecture.ui.auth.state.AuthStateEvent
+import com.example.kotlin_jetpack_architecture.ui.auth.state.AuthStateEvent.*
 import com.example.kotlin_jetpack_architecture.ui.auth.state.LoginFields
 import kotlinx.android.synthetic.main.fragment_login.*
 
@@ -24,15 +26,6 @@ class LoginFragment : BaseAuthFragment() {
         super.onViewCreated(view, savedInstanceState)
         Log.d(TAG, "LoginFragment: $viewModel")
         subscribeObservers()
-
-        login_button.setOnClickListener {
-            viewModel.setAuthToken(
-                AuthToken(
-                    1,
-                    "gdfngidfng4nt43n43jn34jn"
-                )
-            )
-        }
     }
 
     private fun subscribeObservers(){
@@ -42,6 +35,15 @@ class LoginFragment : BaseAuthFragment() {
                 loginFields.login_password?.let{input_password.setText(it)}
             }
         })
+    }
+
+    fun login(){
+        viewModel.setStateEvent(
+            LoginAttemptEvent(
+                input_email.text.toString(),
+                input_password.text.toString()
+            )
+        )
     }
 
     override fun onDestroyView() {
