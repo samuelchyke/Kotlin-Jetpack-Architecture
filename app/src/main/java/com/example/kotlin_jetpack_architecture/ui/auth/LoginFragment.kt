@@ -26,6 +26,8 @@ class LoginFragment : BaseAuthFragment() {
         super.onViewCreated(view, savedInstanceState)
         Log.d(TAG, "LoginFragment: $viewModel")
         subscribeObservers()
+
+        login_button.setOnClickListener { login()}
     }
 
     private fun subscribeObservers(){
