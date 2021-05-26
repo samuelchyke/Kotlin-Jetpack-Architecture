@@ -5,6 +5,8 @@ import android.os.Bundle
 import android.util.Log
 import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProvider
+import androidx.navigation.NavController
+import androidx.navigation.NavDestination
 import com.example.kotlin_jetpack_architecture.R
 import com.example.kotlin_jetpack_architecture.ui.BaseActivity
 import com.example.kotlin_jetpack_architecture.ui.ResponseType
@@ -12,7 +14,7 @@ import com.example.kotlin_jetpack_architecture.ui.main.MainActivity
 import com.example.kotlin_jetpack_architecture.viewmodels.ViewModelProviderFactory
 import javax.inject.Inject
 
-class AuthActivity : BaseActivity() {
+class AuthActivity : BaseActivity(), NavController.OnDestinationChangedListener {
 
     @Inject
     lateinit var providerFactory: ViewModelProviderFactory
@@ -84,5 +86,13 @@ class AuthActivity : BaseActivity() {
         val intent = Intent(this, MainActivity::class.java)
         startActivity(intent)
         finish()
+    }
+
+    override fun onDestinationChanged(
+        controller: NavController,
+        destination: NavDestination,
+        arguments: Bundle?
+    ) {
+        viewModel.cancelActiveJobs()
     }
 }

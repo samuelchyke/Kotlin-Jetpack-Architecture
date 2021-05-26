@@ -8,6 +8,7 @@ import com.example.kotlin_jetpack_architecture.ui.DataState
 import com.example.kotlin_jetpack_architecture.ui.auth.state.*
 import com.example.kotlin_jetpack_architecture.ui.auth.state.AuthStateEvent.*
 import com.example.kotlin_jetpack_architecture.util.AbsentLiveData
+import kotlinx.coroutines.InternalCoroutinesApi
 import javax.inject.Inject
 
 class AuthViewModel
@@ -16,6 +17,7 @@ constructor(
     val authRepository: AuthRepository
 ): BaseViewModel<AuthStateEvent,AuthViewState>()
 {
+    @InternalCoroutinesApi
     override fun handleStateEvent(stateEvent: AuthStateEvent): LiveData<DataState<AuthViewState>> {
         when(stateEvent){
 
@@ -72,5 +74,14 @@ constructor(
         }
         update.authToken = authToken
         _viewState.value = update
+    }
+
+    fun cancelActiveJobs(){
+        authRepository.cancelActiveJobs()
+    }
+
+    override fun onCleared() {
+        super.onCleared()
+        cancelActiveJobs()
     }
 }
