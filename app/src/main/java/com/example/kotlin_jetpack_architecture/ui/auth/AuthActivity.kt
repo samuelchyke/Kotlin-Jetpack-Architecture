@@ -3,6 +3,7 @@ package com.example.kotlin_jetpack_architecture.ui.auth
 import android.content.Intent
 import android.os.Bundle
 import android.util.Log
+import android.view.View
 import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProvider
 import androidx.navigation.NavController
@@ -12,6 +13,7 @@ import com.example.kotlin_jetpack_architecture.ui.BaseActivity
 import com.example.kotlin_jetpack_architecture.ui.ResponseType
 import com.example.kotlin_jetpack_architecture.ui.main.MainActivity
 import com.example.kotlin_jetpack_architecture.viewmodels.ViewModelProviderFactory
+import kotlinx.android.synthetic.main.activity_main.*
 import javax.inject.Inject
 
 class AuthActivity : BaseActivity(), NavController.OnDestinationChangedListener {
@@ -31,33 +33,13 @@ class AuthActivity : BaseActivity(), NavController.OnDestinationChangedListener 
 
     private fun subscribeObservers(){
         viewModel.dataState.observe(this, { dataState ->
+            onDataStateChange(dataState)
             dataState.data?.let { data ->
                 data.data?.let { event ->
                     event.getContentIfNotHandled()?.let { authViewState ->
                         authViewState.authToken?.let {
                             Log.d(TAG, "AuthActivity, DataState: $it")
                             viewModel.setAuthToken(it)
-                        }
-                    }
-                }
-                data.response?.let { event ->
-                    event.getContentIfNotHandled()?.let {
-                        when (it.responseType) {
-                            is ResponseType.Dialog -> {
-                                // show dialog
-                            }
-
-                            is ResponseType.Toast -> {
-                                // show toast
-                            }
-
-                            is ResponseType.None -> {
-                                // print to log
-                                Log.e(
-                                    TAG,
-                                    "AuthActivity: Response: ${it.message}, ${it.responseType}"
-                                )
-                            }
                         }
                     }
                 }
@@ -94,5 +76,14 @@ class AuthActivity : BaseActivity(), NavController.OnDestinationChangedListener 
         arguments: Bundle?
     ) {
         viewModel.cancelActiveJobs()
+    }
+
+    override fun displayProgressBar(bool: Boolean) {
+        if (bool){
+            progress_bar.visibility = View.VISIBLE
+        }
+        else{
+            progress_bar.visibility = View.INVISIBLE
+        }
     }
 }
