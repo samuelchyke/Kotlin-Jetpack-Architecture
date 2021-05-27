@@ -20,13 +20,12 @@ import com.google.gson.annotations.SerializedName
 )
 data class AuthToken (
 
-    @PrimaryKey(autoGenerate = false)
+    @PrimaryKey
     @ColumnInfo(name ="account_pk")
-    var account_pk: Int = -1,
+    var account_pk: Int? = -1,
 
     @SerializedName("token")
     @Expose
     @ColumnInfo(name = "token")
     var token: String? = null,
-        ){
-}
+)

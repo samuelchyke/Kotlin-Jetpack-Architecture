@@ -14,5 +14,5 @@ sealed class AuthStateEvent{
         val confirm_password: String
     ): AuthStateEvent()
 
-    object CheckPreviousAuthEvent : AuthStateEvent()
+    class CheckPreviousAuthEvent : AuthStateEvent()
 }

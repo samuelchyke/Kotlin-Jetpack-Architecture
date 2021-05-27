@@ -1,5 +1,7 @@
 package com.example.kotlin_jetpack_architecture.di
 import android.app.Application
+import android.content.Context
+import android.content.SharedPreferences
 import androidx.room.Room
 import com.bumptech.glide.Glide
 import com.bumptech.glide.RequestManager
@@ -11,6 +13,7 @@ import com.example.kotlin_jetpack_architecture.persistence.AppDatabase.Companion
 import com.example.kotlin_jetpack_architecture.persistence.AuthTokenDao
 import com.example.kotlin_jetpack_architecture.util.Constants
 import com.example.kotlin_jetpack_architecture.util.LiveDataCallAdapterFactory
+import com.example.kotlin_jetpack_architecture.util.PreferenceKeys
 import com.google.gson.Gson
 import com.google.gson.GsonBuilder
 import dagger.Module
@@ -21,6 +24,20 @@ import javax.inject.Singleton
 
 @Module
 class AppModule{
+
+
+    @Singleton
+    @Provides
+    fun provideSharedPreferences(application: Application): SharedPreferences {
+        return application.getSharedPreferences(PreferenceKeys.APP_PREFERENCES, Context.MODE_PRIVATE)
+    }
+
+
+    @Singleton
+    @Provides
+    fun provideSharedPrefsEditor(sharedPreferences: SharedPreferences): SharedPreferences.Editor{
+        return sharedPreferences.edit()
+    }
 
     @Singleton
     @Provides
