@@ -15,6 +15,7 @@ import com.example.kotlin_jetpack_architecture.ui.auth.state.AuthStateEvent
 import com.example.kotlin_jetpack_architecture.ui.main.MainActivity
 import com.example.kotlin_jetpack_architecture.util.SuccessHandling.Companion.RESPONSE_CHECK_PREVIOUS_AUTH_USER_DONE
 import com.example.kotlin_jetpack_architecture.viewmodels.ViewModelProviderFactory
+import com.google.android.material.appbar.AppBarLayout
 import kotlinx.android.synthetic.main.activity_auth.*
 import kotlinx.android.synthetic.main.activity_main.*
 import kotlinx.android.synthetic.main.activity_main.progress_bar
@@ -109,6 +110,9 @@ class AuthActivity : BaseActivity(),
 
     private fun onFinishCheckPreviousAuthUser(){
         fragment_container.visibility = View.VISIBLE
+    }
+
+    override fun expandAppBar() {//ignore
     }
 
 

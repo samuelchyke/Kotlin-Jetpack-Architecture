@@ -1,7 +1,14 @@
 package com.example.kotlin_jetpack_architecture.ui.main.account
 
 import android.content.Context
+import android.os.Bundle
 import android.util.Log
+import android.view.View
+import androidx.appcompat.app.AppCompatActivity
+import androidx.navigation.fragment.findNavController
+import androidx.navigation.ui.AppBarConfiguration
+import androidx.navigation.ui.NavigationUI
+import com.example.kotlin_jetpack_architecture.R
 import com.example.kotlin_jetpack_architecture.ui.DataStateChangeListener
 import dagger.android.support.DaggerFragment
 
@@ -11,6 +18,21 @@ abstract class BaseAccountFragment : DaggerFragment(){
 
     lateinit var stateChangeListener: DataStateChangeListener
 
+
+    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+        super.onViewCreated(view, savedInstanceState)
+
+        setUpActionBarWithNavController(R.id.accountFragment, activity as AppCompatActivity)
+    }
+
+    fun setUpActionBarWithNavController(fragmentId : Int, activity: AppCompatActivity){
+        val appBarConfiguration = AppBarConfiguration(setOf(fragmentId))
+        NavigationUI.setupActionBarWithNavController(
+            activity,
+            findNavController(),
+            appBarConfiguration
+        )
+    }
     override fun onAttach(context: Context) {
         super.onAttach(context)
         try{

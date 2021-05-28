@@ -18,6 +18,7 @@ import com.example.kotlin_jetpack_architecture.ui.main.blog.ViewBlogFragment
 import com.example.kotlin_jetpack_architecture.util.BottomNavController
 import com.example.kotlin_jetpack_architecture.util.BottomNavController.*
 import com.example.kotlin_jetpack_architecture.util.setUpNavigation
+import com.google.android.material.appbar.AppBarLayout
 import com.google.android.material.bottomnavigation.BottomNavigationView
 import kotlinx.android.synthetic.main.activity_main.*
 
@@ -93,6 +94,10 @@ NavGraphProvider,
         return super.onOptionsItemSelected(item)
     }
 
+    override fun expandAppBar() {
+        findViewById<AppBarLayout>(R.id.app_bar).setExpanded(true)
+    }
+
     override fun getNavGraphId(itemId: Int):Int = when(itemId){
         R.id.nav_blog -> {
             R.navigation.nav_blog
@@ -109,7 +114,7 @@ NavGraphProvider,
     }
 
     override fun onGraphChange() {
-        //TODO("Not yet implemented")
+        expandAppBar()
     }
 
     override fun onReselectNavItem(navController: NavController, fragment: Fragment)

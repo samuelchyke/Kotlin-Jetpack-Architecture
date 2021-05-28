@@ -35,7 +35,7 @@
     <string name="fragment_change_password">Change password</string>
     <string name="fragment_blog">Blog</string>
     <string name="save_changes">Save changes</string>
-    <string name="fragment_update_account">Update account</string>
+    <string name="fragment_update_account">Update Account</string>
     <string name="arg_email">arg_email</string>
     <string name="arg_username">arg_username</string>
     <string name="enter_a_username">Enter a username</string>
