@@ -21,6 +21,7 @@ import com.example.kotlin_jetpack_architecture.util.setUpNavigation
 import com.google.android.material.bottomnavigation.BottomNavigationView
 import kotlinx.android.synthetic.main.activity_main.*
 
+
 class MainActivity : BaseActivity() ,
 NavGraphProvider,
     OnNavigationGraphChanged,
@@ -32,7 +33,7 @@ NavGraphProvider,
     private val bottomNavController by lazy(LazyThreadSafetyMode.NONE){
         BottomNavController(
             this,
-            R.id.nav_host_fragment_container,
+            R.id.main_nav_host_fragment,
             R.id.nav_blog,
             this,
             this
@@ -51,14 +52,16 @@ NavGraphProvider,
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setupActionBar()
         setContentView(R.layout.activity_main)
+
         bottomNavigationView = findViewById(R.id.bottom_navigation_view)
         bottomNavigationView.setUpNavigation(bottomNavController, this)
         if(savedInstanceState == null){
             bottomNavController.onNavigationItemSelected()
         }
+
         subscribeObservers()
+        setupActionBar()
     }
 
     private fun subscribeObservers(){
@@ -84,7 +87,7 @@ NavGraphProvider,
 
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
 
-        when(item.itemId){
+        when(item?.itemId){
             android.R.id.home -> onBackPressed()
         }
         return super.onOptionsItemSelected(item)
@@ -109,7 +112,8 @@ NavGraphProvider,
         //TODO("Not yet implemented")
     }
 
-    override fun onReselectNavItem(navController: NavController, fragment: Fragment)  = when(fragment){
+    override fun onReselectNavItem(navController: NavController, fragment: Fragment)
+    = when(fragment){
 
         is ViewBlogFragment -> {
             navController.navigate(R.id.action_viewBlogFragment_to_home)

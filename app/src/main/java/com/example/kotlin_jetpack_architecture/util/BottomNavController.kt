@@ -30,7 +30,7 @@ class BottomNavController(
     val navGraphProvider: NavGraphProvider
 ) {
     private val TAG: String = "AppDebug"
-    private val navigationBackStack = BackStack.of(appStartDestinationId)
+    private val navigationBackStack = Backstack.of(appStartDestinationId)
     lateinit var activity: Activity
     lateinit var fragmentManager: FragmentManager
     lateinit var navItemChangeListener: OnNavigationItemChanged
@@ -48,6 +48,7 @@ class BottomNavController(
         // Replace fragment representing a navigation item
         val fragment = fragmentManager.findFragmentByTag(itemId.toString())
             ?: NavHostFragment.create(navGraphProvider.getNavGraphId(itemId))
+
         fragmentManager.beginTransaction()
             .setCustomAnimations(
                 R.anim.fade_in,
@@ -104,10 +105,10 @@ class BottomNavController(
         }
     }
 
-    private class BackStack : ArrayList<Int>() {
+    class Backstack : ArrayList<Int>() {
         companion object {
-            fun of(vararg elements: Int): BackStack {
-                val b = BackStack()
+            fun of(vararg elements: Int): Backstack {
+                val b = Backstack()
                 b.addAll(elements.toTypedArray())
                 return b
             }
@@ -120,7 +121,6 @@ class BottomNavController(
             add(item) // add to end of list
         }
     }
-
 
     // For setting the checked icon in the bottom nav
     interface OnNavigationItemChanged {

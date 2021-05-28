@@ -25,7 +25,7 @@ class ViewBlogFragment : BaseBlogFragment(){
         // TODO("Check if user is author of blog post")
         val isAuthorOfBlogPost = true
         if(isAuthorOfBlogPost){
-            inflater.inflate(R.menu.edit_view_menu, menu)
+              inflater.inflate(R.menu.edit_view_menu, menu)
         }
     }
 
