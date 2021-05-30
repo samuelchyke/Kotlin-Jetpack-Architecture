@@ -39,7 +39,7 @@ constructor(
     val openApiAuthService: OpenApiAuthService,
     val sessionManager: SessionManager,
     val sharedPreferences: SharedPreferences,
-    val sharedPrefsEditor: SharedPreferences.Editor
+    val sharedPrefsEditor: SharedPreferences.Editor, shouldLoadFromCache: Boolean
 ) {
 
     private var repositoryJob: Job? = null
@@ -52,8 +52,9 @@ constructor(
             return returnErrorResponse(loginFieldErrors, ResponseType.Dialog())
         }
 
-        return object : NetworkBoundResource<LoginResponse, AuthViewState>(
-            sessionManager.isConnectedToTheInternet() == true, isNetworkRequest = true
+        return object : NetworkBoundResource<LoginResponse, Any, AuthViewState>(
+            sessionManager.isConnectedToTheInternet() == true, isNetworkRequest = true,
+            shouldLoadFromCache = false
         ) {
             override suspend fun handleApiSuccessResponse(response: ApiSuccessResponse<LoginResponse>) {
                 Log.d(TAG, "handleApiSuccessResponse:${response}")
@@ -118,6 +119,14 @@ constructor(
                 TODO("Not yet implemented")
             }
 
+            override fun loadFromCache(): LiveData<AuthViewState> {
+                return AbsentLiveData.create()
+            }
+
+            override suspend fun updateLocalDb(cacheObject: Any?) {
+                TODO("Not yet implemented")
+            }
+
         }.asLiveData()
     }
 
@@ -135,8 +144,9 @@ constructor(
             return returnErrorResponse(registrationFieldErrors, ResponseType.Dialog())
         }
 
-        return object : NetworkBoundResource<RegistrationResponse, AuthViewState>(
-            sessionManager.isConnectedToTheInternet() == true, isNetworkRequest = true
+        return object : NetworkBoundResource<RegistrationResponse,Any, AuthViewState>(
+            sessionManager.isConnectedToTheInternet() == true, isNetworkRequest = true,
+            shouldLoadFromCache = false
         ) {
             override suspend fun handleApiSuccessResponse(response: ApiSuccessResponse<RegistrationResponse>) {
 
@@ -200,6 +210,14 @@ constructor(
                 TODO("Not yet implemented")
             }
 
+            override fun loadFromCache(): LiveData<AuthViewState> {
+                return AbsentLiveData.create()
+            }
+
+            override suspend fun updateLocalDb(cacheObject: Any?) {
+                TODO("Not yet implemented")
+            }
+
         }.asLiveData()
     }
 
@@ -213,9 +231,10 @@ constructor(
             return returnNoTokenFound()
         }
         else{
-            return object: NetworkBoundResource<Void, AuthViewState>(
+            return object: NetworkBoundResource<Void,Any, AuthViewState>(
                 sessionManager.isConnectedToTheInternet() == true,
-                false
+                false,
+                shouldLoadFromCache = false
             ){
 
                 override suspend fun createCacheRequestAndReturn() {
@@ -265,6 +284,14 @@ constructor(
                 override fun setJob(job: Job) {
                     repositoryJob?.cancel()
                     repositoryJob = job
+                }
+
+                override fun loadFromCache(): LiveData<AuthViewState> {
+                    return AbsentLiveData.create()
+                }
+
+                override suspend fun updateLocalDb(cacheObject: Any?) {
+                    TODO("Not yet implemented")
                 }
 
 

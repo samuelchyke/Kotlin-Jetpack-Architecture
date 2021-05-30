@@ -10,6 +10,7 @@ import com.example.kotlin_jetpack_architecture.ui.main.account.state.AccountStat
 import com.example.kotlin_jetpack_architecture.ui.main.account.state.AccountStateEvent.*
 import com.example.kotlin_jetpack_architecture.ui.main.account.state.AccountViewState
 import com.example.kotlin_jetpack_architecture.util.AbsentLiveData
+import kotlinx.coroutines.InternalCoroutinesApi
 import javax.inject.Inject
 
 class AccountViewModel
@@ -19,10 +20,13 @@ constructor(
     val accountRepository: AccountRepository
 ): BaseViewModel<AccountStateEvent, AccountViewState>()
 {
+    @InternalCoroutinesApi
     override fun handleStateEvent(stateEvent: AccountStateEvent): LiveData<DataState<AccountViewState>> {
         when(stateEvent){
             is GetAccountPropertiesEvent ->{
-                return AbsentLiveData.create()
+                return sessionManager.cachedToken.value?.let { authToken ->
+                    accountRepository.getAccountProperties(authToken)
+                }?: AbsentLiveData.create()
             }
             is UpdateAccountPropertiesEvent ->{
                 return AbsentLiveData.create()
