@@ -40,13 +40,13 @@ class AccountFragment : BaseAccountFragment(){
     }
 
     private fun subscribeObservers(){
-        viewModel.dataState.observe(viewLifecycleOwner, Observer{ dataState ->
+        viewModel.dataState.observe(viewLifecycleOwner, { dataState ->
             stateChangeListener.onDataStateChange(dataState)
-            if(dataState != null){
+            if (dataState != null) {
                 dataState.data?.let { data ->
-                    data.data?.let{ event ->
-                        event.getContentIfNotHandled()?.let{ viewState ->
-                            viewState.accountProperties?.let{ accountProperties ->
+                    data.data?.let { event ->
+                        event.getContentIfNotHandled()?.let { viewState ->
+                            viewState.accountProperties?.let { accountProperties ->
                                 Log.d(TAG, "AccountFragment, DataState: $accountProperties")
                                 viewModel.setAccountPropertiesData(accountProperties)
                             }
@@ -56,7 +56,7 @@ class AccountFragment : BaseAccountFragment(){
             }
         })
 
-        viewModel.viewState.observe(viewLifecycleOwner, Observer{ viewState->
+        viewModel.viewState.observe(viewLifecycleOwner, { viewState->
             if(viewState != null){
                 viewState.accountProperties?.let{
                     Log.d(TAG, "AccountFragment, ViewState: $it")

@@ -1,7 +1,7 @@
 package com.example.kotlin_jetpack_architecture.di.auth
 
 import android.content.SharedPreferences
-import com.example.kotlin_jetpack_architecture.api.auth.OpenApiAuthService
+import com.example.kotlin_jetpack_architecture.api.auth.main.OpenApiAuthService
 import com.example.kotlin_jetpack_architecture.persistence.AccountPropertiesDao
 import com.example.kotlin_jetpack_architecture.persistence.AuthTokenDao
 import com.example.kotlin_jetpack_architecture.repository.auth.AuthRepository
@@ -16,7 +16,7 @@ class AuthModule{
     // TEMPORARY
     @AuthScope
     @Provides
-    fun provideFakeApiService(retrofitBuilder: Retrofit.Builder): OpenApiAuthService{
+    fun provideFakeApiService(retrofitBuilder: Retrofit.Builder): OpenApiAuthService {
         return retrofitBuilder
             .build()
             .create(OpenApiAuthService::class.java)
@@ -30,7 +30,7 @@ class AuthModule{
         accountPropertiesDao: AccountPropertiesDao,
         openApiAuthService: OpenApiAuthService,
         sharedPreferences: SharedPreferences,
-        sharedPrefsEditor: SharedPreferences.Editor
+        sharedPrefsEditor: SharedPreferences.Editor,
     ): AuthRepository {
         return AuthRepository(
             authTokenDao,

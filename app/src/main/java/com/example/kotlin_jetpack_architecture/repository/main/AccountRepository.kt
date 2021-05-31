@@ -12,9 +12,13 @@ import com.example.kotlin_jetpack_architecture.ui.DataState
 import com.example.kotlin_jetpack_architecture.ui.main.account.state.AccountViewState
 import com.example.kotlin_jetpack_architecture.util.AbsentLiveData
 import androidx.lifecycle.switchMap
+import com.example.kotlin_jetpack_architecture.api.GenericResponse
+import com.example.kotlin_jetpack_architecture.ui.Response
+import com.example.kotlin_jetpack_architecture.ui.ResponseType
 import com.example.kotlin_jetpack_architecture.util.ApiSuccessResponse
 import com.example.kotlin_jetpack_architecture.util.GenericApiResponse
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.Dispatchers.Main
 import kotlinx.coroutines.InternalCoroutinesApi
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.withContext
@@ -38,7 +42,8 @@ constructor(
         return object: NetworkBoundResource< AccountProperties, AccountProperties, AccountViewState>(
             isNetworkAvailable = sessionManager.isConnectedToTheInternet() == true,
             isNetworkRequest = true,
-            shouldLoadFromCache = true
+            shouldLoadFromCache = true,
+            shouldCancelIfNoInternet = false
         ){
 
             override fun loadFromCache(): LiveData<AccountViewState> {
@@ -95,6 +100,65 @@ constructor(
         }.asLiveData()
     }
 
+    @InternalCoroutinesApi
+    fun saveAccountProperties(
+        authToken: AuthToken,
+        accountProperties: AccountProperties
+    ): LiveData<DataState<AccountViewState>>{
+        return object: NetworkBoundResource<GenericResponse, Any, AccountViewState>(
+            sessionManager.isConnectedToTheInternet() == true,
+            isNetworkRequest = true,
+            shouldLoadFromCache = false,
+            shouldCancelIfNoInternet = true
+        ){
+            //Not Applicable
+            override suspend fun createCacheRequestAndReturn() {
+                TODO("Not yet implemented")
+            }
+
+            override suspend fun handleApiSuccessResponse(response: ApiSuccessResponse<GenericResponse>) {
+
+                updateLocalDb(null)
+
+                withContext(Main) {
+
+                    onCompleteJob(
+                        DataState.data(
+                            null,
+                            Response(response.body.response, ResponseType.Toast())
+                        )
+                    )
+                }
+            }
+
+            override fun createCall(): LiveData<GenericApiResponse<GenericResponse>> {
+                return openApiMainService.saveAccountProperties(
+                    "Token${authToken.token!!}",
+                    accountProperties.email,
+                    accountProperties.username
+                )
+            }
+
+            //not Used
+            override fun loadFromCache(): LiveData<AccountViewState> {
+                return AbsentLiveData.create()
+            }
+
+            override suspend fun updateLocalDb(cacheObject: Any?) {
+               return accountPropertiesDao.updateAccountProperties(
+                        accountProperties.pk,
+                        accountProperties.email,
+                        accountProperties.username
+                    )
+            }
+
+            override fun setJob(job: Job) {
+                repositoryJob?.cancel()
+                repositoryJob = job
+            }
+        }.asLiveData()
+
+    }
     fun cancelActiveJobs(){
         Log.d(TAG,"AuthRepository: cancelling on-going jobs....")
     }

@@ -21,7 +21,6 @@ import com.example.kotlin_jetpack_architecture.util.AbsentLiveData
 import com.example.kotlin_jetpack_architecture.util.ApiSuccessResponse
 import com.example.kotlin_jetpack_architecture.util.ErrorHandling.Companion.ERROR_SAVE_AUTH_TOKEN
 import com.example.kotlin_jetpack_architecture.util.ErrorHandling.Companion.GENERIC_AUTH_ERROR
-import com.example.kotlin_jetpack_architecture.util.ErrorHandling.Companion.ERROR_SAVE_ACCOUNT_PROPERTIES
 import com.example.kotlin_jetpack_architecture.util.GenericApiResponse
 import com.example.kotlin_jetpack_architecture.util.PreferenceKeys
 import com.example.kotlin_jetpack_architecture.util.SuccessHandling.Companion.RESPONSE_CHECK_PREVIOUS_AUTH_USER_DONE
@@ -39,7 +38,7 @@ constructor(
     val openApiAuthService: OpenApiAuthService,
     val sessionManager: SessionManager,
     val sharedPreferences: SharedPreferences,
-    val sharedPrefsEditor: SharedPreferences.Editor, shouldLoadFromCache: Boolean
+    val sharedPrefsEditor: SharedPreferences.Editor
 ) {
 
     private var repositoryJob: Job? = null
@@ -54,7 +53,8 @@ constructor(
 
         return object : NetworkBoundResource<LoginResponse, Any, AuthViewState>(
             sessionManager.isConnectedToTheInternet() == true, isNetworkRequest = true,
-            shouldLoadFromCache = false
+            shouldLoadFromCache = false,
+            shouldCancelIfNoInternet = true
         ) {
             override suspend fun handleApiSuccessResponse(response: ApiSuccessResponse<LoginResponse>) {
                 Log.d(TAG, "handleApiSuccessResponse:${response}")
@@ -146,7 +146,8 @@ constructor(
 
         return object : NetworkBoundResource<RegistrationResponse,Any, AuthViewState>(
             sessionManager.isConnectedToTheInternet() == true, isNetworkRequest = true,
-            shouldLoadFromCache = false
+            shouldLoadFromCache = false,
+            shouldCancelIfNoInternet = true
         ) {
             override suspend fun handleApiSuccessResponse(response: ApiSuccessResponse<RegistrationResponse>) {
 
@@ -234,7 +235,8 @@ constructor(
             return object: NetworkBoundResource<Void,Any, AuthViewState>(
                 sessionManager.isConnectedToTheInternet() == true,
                 false,
-                shouldLoadFromCache = false
+                shouldLoadFromCache = false,
+                shouldCancelIfNoInternet = false
             ){
 
                 override suspend fun createCacheRequestAndReturn() {
