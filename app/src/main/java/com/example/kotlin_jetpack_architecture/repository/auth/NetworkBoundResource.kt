@@ -31,7 +31,6 @@ abstract class NetworkBoundResource<ResponseObject,CacheObject, ViewStateType>(
     protected lateinit var job: CompletableJob
     protected lateinit var coroutineScope: CoroutineScope
 
-
     init {
         setJob(initNewJob())
         setValue(DataState.loading(isLoading = true, cachedData = null))

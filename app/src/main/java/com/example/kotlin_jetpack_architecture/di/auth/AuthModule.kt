@@ -1,7 +1,7 @@
 package com.example.kotlin_jetpack_architecture.di.auth
 
 import android.content.SharedPreferences
-import com.example.kotlin_jetpack_architecture.api.auth.main.OpenApiAuthService
+import com.example.kotlin_jetpack_architecture.api.auth.OpenApiAuthService
 import com.example.kotlin_jetpack_architecture.persistence.AccountPropertiesDao
 import com.example.kotlin_jetpack_architecture.persistence.AuthTokenDao
 import com.example.kotlin_jetpack_architecture.repository.auth.AuthRepository

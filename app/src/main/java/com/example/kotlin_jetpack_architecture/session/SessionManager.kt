@@ -8,12 +8,9 @@ import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import com.example.kotlin_jetpack_architecture.models.AuthToken
 import com.example.kotlin_jetpack_architecture.persistence.AuthTokenDao
-import kotlinx.coroutines.CancellationException
-import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.*
 import kotlinx.coroutines.Dispatchers.IO
 import kotlinx.coroutines.Dispatchers.Main
-import kotlinx.coroutines.GlobalScope
-import kotlinx.coroutines.launch
 import javax.inject.Inject
 import javax.inject.Singleton
 
@@ -64,7 +61,7 @@ constructor(
     private fun setValue(newValue: AuthToken?) {
         GlobalScope.launch(Main){
             if(_cachedToken.value != newValue){
-                _cachedToken.value = newValue
+                _cachedToken.value = newValue!!
             }
         }
     }

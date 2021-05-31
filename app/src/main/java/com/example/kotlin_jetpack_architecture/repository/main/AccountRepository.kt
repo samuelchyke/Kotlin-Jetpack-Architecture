@@ -2,7 +2,7 @@ package com.example.kotlin_jetpack_architecture.repository.main
 
 import android.util.Log
 import androidx.lifecycle.LiveData
-import com.example.kotlin_jetpack_architecture.api.auth.main.OpenApiMainService
+import com.example.kotlin_jetpack_architecture.api.main.OpenApiMainService
 import com.example.kotlin_jetpack_architecture.models.AccountProperties
 import com.example.kotlin_jetpack_architecture.models.AuthToken
 import com.example.kotlin_jetpack_architecture.persistence.AccountPropertiesDao
@@ -101,10 +101,7 @@ constructor(
     }
 
     @InternalCoroutinesApi
-    fun saveAccountProperties(
-        authToken: AuthToken,
-        accountProperties: AccountProperties
-    ): LiveData<DataState<AccountViewState>>{
+    fun saveAccountProperties( authToken: AuthToken, accountProperties: AccountProperties): LiveData<DataState<AccountViewState>>{
         return object: NetworkBoundResource<GenericResponse, Any, AccountViewState>(
             sessionManager.isConnectedToTheInternet() == true,
             isNetworkRequest = true,
@@ -113,7 +110,7 @@ constructor(
         ){
             //Not Applicable
             override suspend fun createCacheRequestAndReturn() {
-                TODO("Not yet implemented")
+
             }
 
             override suspend fun handleApiSuccessResponse(response: ApiSuccessResponse<GenericResponse>) {
@@ -124,25 +121,26 @@ constructor(
 
                     onCompleteJob(
                         DataState.data(
-                            null,
-                            Response(response.body.response, ResponseType.Toast())
-                        )
+                            data = null,
+                            response = Response(response.body.response, ResponseType.Toast()))
                     )
                 }
-            }
-
-            override fun createCall(): LiveData<GenericApiResponse<GenericResponse>> {
-                return openApiMainService.saveAccountProperties(
-                    "Token${authToken.token!!}",
-                    accountProperties.email,
-                    accountProperties.username
-                )
             }
 
             //not Used
             override fun loadFromCache(): LiveData<AccountViewState> {
                 return AbsentLiveData.create()
             }
+
+            override fun createCall(): LiveData<GenericApiResponse<GenericResponse>> {
+                return openApiMainService.saveAccountProperties(
+                    "Token ${authToken.token!!}",
+                    accountProperties.email,
+                    accountProperties.username
+                )
+
+            }
+
 
             override suspend fun updateLocalDb(cacheObject: Any?) {
                return accountPropertiesDao.updateAccountProperties(
@@ -159,6 +157,9 @@ constructor(
         }.asLiveData()
 
     }
+
+
+
     fun cancelActiveJobs(){
         Log.d(TAG,"AuthRepository: cancelling on-going jobs....")
     }

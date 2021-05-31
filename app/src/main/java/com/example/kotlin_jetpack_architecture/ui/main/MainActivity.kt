@@ -63,6 +63,7 @@ NavGraphProvider,
 
         subscribeObservers()
         setupActionBar()
+        Log.d(TAG, "Main: Token: ${sessionManager.cachedToken}: ")
     }
 
     private fun subscribeObservers(){

@@ -5,12 +5,10 @@ import android.util.Log
 import android.view.*
 import com.example.kotlin_jetpack_architecture.R
 import com.example.kotlin_jetpack_architecture.models.AccountProperties
-import com.example.kotlin_jetpack_architecture.ui.DataState
 import com.example.kotlin_jetpack_architecture.ui.main.account.state.AccountStateEvent
 import kotlinx.android.synthetic.main.fragment_update_account.*
 
 class UpdateAccountFragment : BaseAccountFragment(){
-
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -22,8 +20,9 @@ class UpdateAccountFragment : BaseAccountFragment(){
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-        subscribeObservers()
         setHasOptionsMenu(true)
+        subscribeObservers()
+        Log.d(TAG, "UpdateAccountFragment: Token: ${viewModel.sessionManager.cachedToken}: ")
     }
 
     private fun subscribeObservers(){
@@ -43,11 +42,11 @@ class UpdateAccountFragment : BaseAccountFragment(){
     }
 
     private fun setAccountDataFields(accountProperties: AccountProperties){
-        input_email?.let{
-            input_email.setText(accountProperties.email)
-        }
-        input_username?.let{
-            input_email.setText(accountProperties.username)
+       if(input_email.text.isNullOrBlank()){
+           input_email.setText(accountProperties.email)
+       }
+        if(input_username.text.isNullOrBlank()){
+            input_username.setText(accountProperties.username)
         }
     }
 
@@ -70,10 +69,9 @@ class UpdateAccountFragment : BaseAccountFragment(){
         when(item.itemId){
             R.id.save ->{
                 saveChanges()
+                return true
             }
         }
         return super.onOptionsItemSelected(item)
-
-
     }
 }

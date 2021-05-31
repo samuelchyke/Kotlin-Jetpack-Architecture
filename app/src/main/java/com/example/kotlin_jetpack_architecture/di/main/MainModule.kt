@@ -1,6 +1,6 @@
 package com.example.kotlin_jetpack_architecture.di.main
 
-import com.example.kotlin_jetpack_architecture.api.auth.main.OpenApiMainService
+import com.example.kotlin_jetpack_architecture.api.main.OpenApiMainService
 import com.example.kotlin_jetpack_architecture.persistence.AccountPropertiesDao
 import com.example.kotlin_jetpack_architecture.repository.main.AccountRepository
 import com.example.kotlin_jetpack_architecture.session.SessionManager
