@@ -6,13 +6,14 @@ import com.example.kotlin_jetpack_architecture.api.main.OpenApiMainService
 import com.example.kotlin_jetpack_architecture.models.AccountProperties
 import com.example.kotlin_jetpack_architecture.models.AuthToken
 import com.example.kotlin_jetpack_architecture.persistence.AccountPropertiesDao
-import com.example.kotlin_jetpack_architecture.repository.auth.NetworkBoundResource
+import com.example.kotlin_jetpack_architecture.repository.NetworkBoundResource
 import com.example.kotlin_jetpack_architecture.session.SessionManager
 import com.example.kotlin_jetpack_architecture.ui.DataState
 import com.example.kotlin_jetpack_architecture.ui.main.account.state.AccountViewState
 import com.example.kotlin_jetpack_architecture.util.AbsentLiveData
 import androidx.lifecycle.switchMap
 import com.example.kotlin_jetpack_architecture.api.GenericResponse
+import com.example.kotlin_jetpack_architecture.repository.JobManager
 import com.example.kotlin_jetpack_architecture.ui.Response
 import com.example.kotlin_jetpack_architecture.ui.ResponseType
 import com.example.kotlin_jetpack_architecture.util.ApiSuccessResponse
@@ -25,18 +26,16 @@ import kotlinx.coroutines.withContext
 import retrofit2.http.Field
 import javax.inject.Inject
 
-
+private val TAG = "AppDebug"
 class AccountRepository
 @Inject
 constructor(
     val openApiMainService: OpenApiMainService,
     val accountPropertiesDao: AccountPropertiesDao,
     val sessionManager: SessionManager
-){
+): JobManager("AccountRepository"){
 
-    private val TAG = "AppDebug"
 
-    private var repositoryJob: Job? = null
 
     @InternalCoroutinesApi
     fun getAccountProperties(authToken: AuthToken): LiveData<DataState<AccountViewState>> {
@@ -94,8 +93,7 @@ constructor(
 
 
             override fun setJob(job: Job) {
-                repositoryJob?.cancel()
-                repositoryJob = job
+                addJob("getAccountProperties", job)
             }
 
         }.asLiveData()
@@ -152,8 +150,7 @@ constructor(
             }
 
             override fun setJob(job: Job) {
-                repositoryJob?.cancel()
-                repositoryJob = job
+                addJob("updatePassword", job)
             }
         }.asLiveData()
 
@@ -210,15 +207,10 @@ constructor(
             }
 
             override fun setJob(job: Job) {
-                repositoryJob?.cancel()
-                repositoryJob = job
+                addJob("saveAccountProperties", job)
             }
         }.asLiveData()
 
     }
 
-
-    fun cancelActiveJobs(){
-        Log.d(TAG,"AuthRepository: cancelling on-going jobs....")
-    }
 }

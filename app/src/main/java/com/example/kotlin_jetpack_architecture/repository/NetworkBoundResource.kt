@@ -1,4 +1,4 @@
-package com.example.kotlin_jetpack_architecture.repository.auth
+package com.example.kotlin_jetpack_architecture.repository
 
 import android.util.Log
 import androidx.lifecycle.LiveData

@@ -11,6 +11,7 @@ import androidx.navigation.ui.AppBarConfiguration
 import androidx.navigation.ui.NavigationUI
 import com.example.kotlin_jetpack_architecture.R
 import com.example.kotlin_jetpack_architecture.ui.DataStateChangeListener
+import com.example.kotlin_jetpack_architecture.ui.auth.state.AuthStateEvent
 import com.example.kotlin_jetpack_architecture.viewmodels.ViewModelProviderFactory
 import dagger.android.support.DaggerFragment
 import javax.inject.Inject
@@ -34,6 +35,7 @@ abstract class BaseAccountFragment : DaggerFragment(){
         viewModel = activity?.run {
             ViewModelProvider(this, providerFactory).get(AccountViewModel::class.java)
         }?: throw Exception("Invalid Activity")
+        cancelActiveJobs()
     }
 
     fun setUpActionBarWithNavController(fragmentId : Int, activity: AppCompatActivity){
@@ -51,6 +53,12 @@ abstract class BaseAccountFragment : DaggerFragment(){
         }catch(e: ClassCastException){
             Log.e(TAG, "$context must implement DataStateChangeListener" )
         }
+    }
+
+
+
+    fun cancelActiveJobs(){
+        viewModel.cancelActiveJobs()
     }
 
 

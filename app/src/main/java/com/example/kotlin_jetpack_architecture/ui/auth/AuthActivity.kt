@@ -36,6 +36,11 @@ class AuthActivity : BaseActivity(),
         viewModel = ViewModelProvider(this, providerFactory).get(AuthViewModel::class.java)
 
         subscribeObservers()
+
+    }
+
+    override fun onResumed() {
+        super.onResume()
         checkPreviousAuthUser()
     }
 

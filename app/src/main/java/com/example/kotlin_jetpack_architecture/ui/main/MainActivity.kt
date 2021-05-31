@@ -11,8 +11,11 @@ import androidx.navigation.NavController
 import com.example.kotlin_jetpack_architecture.R
 import com.example.kotlin_jetpack_architecture.ui.BaseActivity
 import com.example.kotlin_jetpack_architecture.ui.auth.AuthActivity
+import com.example.kotlin_jetpack_architecture.ui.main.account.BaseAccountFragment
 import com.example.kotlin_jetpack_architecture.ui.main.account.ChangePasswordFragment
 import com.example.kotlin_jetpack_architecture.ui.main.account.UpdateAccountFragment
+import com.example.kotlin_jetpack_architecture.ui.main.blog.BaseBlogFragment
+import com.example.kotlin_jetpack_architecture.ui.main.blog.BaseCreateBlogFragment
 import com.example.kotlin_jetpack_architecture.ui.main.blog.UpdateBlogFragment
 import com.example.kotlin_jetpack_architecture.ui.main.blog.ViewBlogFragment
 import com.example.kotlin_jetpack_architecture.util.BottomNavController
@@ -116,7 +119,25 @@ NavGraphProvider,
 
     override fun onGraphChange() {
         expandAppBar()
+        cancelActiveJobs()
     }
+
+    private fun cancelActiveJobs() {
+        val fragments = bottomNavController.fragmentManager
+            .findFragmentById(bottomNavController.containerId)
+            ?.childFragmentManager
+            ?.fragments
+        if(fragments != null){
+            for(fragment in fragments){
+                when(fragment){
+                    is BaseAccountFragment -> fragment.cancelActiveJobs()
+                    is BaseBlogFragment-> fragment.cancelActiveJobs()
+                    is BaseCreateBlogFragment-> fragment.cancelActiveJobs()
+                    }
+                }
+            }
+        displayProgressBar(false)
+        }
 
     override fun onReselectNavItem(navController: NavController, fragment: Fragment)
     = when(fragment){
