@@ -22,7 +22,6 @@ class UpdateAccountFragment : BaseAccountFragment(){
         super.onViewCreated(view, savedInstanceState)
         setHasOptionsMenu(true)
         subscribeObservers()
-        Log.d(TAG, "UpdateAccountFragment: Token: ${viewModel.sessionManager.cachedToken}: ")
     }
 
     private fun subscribeObservers(){

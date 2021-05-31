@@ -22,6 +22,7 @@ import kotlinx.coroutines.Dispatchers.Main
 import kotlinx.coroutines.InternalCoroutinesApi
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.withContext
+import retrofit2.http.Field
 import javax.inject.Inject
 
 
@@ -101,6 +102,64 @@ constructor(
     }
 
     @InternalCoroutinesApi
+    fun updatePassword(
+        authToken: AuthToken,
+        currentPassword: String,
+        newPassword: String,
+        confirmNewPassword: String): LiveData<DataState<AccountViewState>>{
+        return object: NetworkBoundResource<GenericResponse, Any, AccountViewState>(
+            isNetworkAvailable = sessionManager.isConnectedToTheInternet() == true,
+            isNetworkRequest = true,
+            shouldLoadFromCache = false,
+            shouldCancelIfNoInternet = true
+        ){
+            //Not Applicable
+            override suspend fun createCacheRequestAndReturn() {
+
+            }
+
+            override suspend fun handleApiSuccessResponse(response: ApiSuccessResponse<GenericResponse>) {
+
+
+                withContext(Main) {
+
+                    onCompleteJob(
+                        DataState.data(
+                            data = null,
+                            response = Response(response.body.response, ResponseType.Toast())
+                        )
+                    )
+                }
+            }
+
+            //not Used
+            override fun loadFromCache(): LiveData<AccountViewState> {
+                return AbsentLiveData.create()
+            }
+
+            override fun createCall(): LiveData<GenericApiResponse<GenericResponse>> {
+                return openApiMainService.updatePassword(
+                    "Token ${authToken.token!!}",
+                    currentPassword,
+                    newPassword,
+                    confirmNewPassword
+                )
+
+            }
+
+
+            override suspend fun updateLocalDb(cacheObject: Any?) {
+            }
+
+            override fun setJob(job: Job) {
+                repositoryJob?.cancel()
+                repositoryJob = job
+            }
+        }.asLiveData()
+
+    }
+
+    @InternalCoroutinesApi
     fun saveAccountProperties( authToken: AuthToken, accountProperties: AccountProperties): LiveData<DataState<AccountViewState>>{
         return object: NetworkBoundResource<GenericResponse, Any, AccountViewState>(
             sessionManager.isConnectedToTheInternet() == true,
@@ -143,11 +202,11 @@ constructor(
 
 
             override suspend fun updateLocalDb(cacheObject: Any?) {
-               return accountPropertiesDao.updateAccountProperties(
-                        accountProperties.pk,
-                        accountProperties.email,
-                        accountProperties.username
-                    )
+                return accountPropertiesDao.updateAccountProperties(
+                    accountProperties.pk,
+                    accountProperties.email,
+                    accountProperties.username
+                )
             }
 
             override fun setJob(job: Job) {
@@ -157,7 +216,6 @@ constructor(
         }.asLiveData()
 
     }
-
 
 
     fun cancelActiveJobs(){
