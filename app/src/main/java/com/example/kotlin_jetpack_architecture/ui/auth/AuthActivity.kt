@@ -39,7 +39,8 @@ class AuthActivity : BaseActivity(),
 
     }
 
-    override fun onResumed() {
+
+    override fun onResume() {
         super.onResume()
         checkPreviousAuthUser()
     }
