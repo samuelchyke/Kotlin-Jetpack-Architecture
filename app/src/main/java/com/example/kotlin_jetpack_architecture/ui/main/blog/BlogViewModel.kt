@@ -12,6 +12,7 @@ import com.example.kotlin_jetpack_architecture.ui.main.blog.state.BlogStateEvent
 import com.example.kotlin_jetpack_architecture.ui.main.blog.state.BlogStateEvent.*
 import com.example.kotlin_jetpack_architecture.ui.main.blog.state.BlogViewState
 import com.example.kotlin_jetpack_architecture.util.AbsentLiveData
+import kotlinx.coroutines.InternalCoroutinesApi
 import javax.inject.Inject
 
 class BlogViewModel
@@ -22,15 +23,23 @@ constructor(
     private val sharedPreferences: SharedPreferences,
     private val requestManager: RequestManager
 ): BaseViewModel<BlogStateEvent, BlogViewState>(){
+
+    @InternalCoroutinesApi
     override fun handleStateEvent(stateEvent: BlogStateEvent): LiveData<DataState<BlogViewState>> {
-        when(stateEvent){
+        return when(stateEvent){
 
             is BlogSearchEvent ->{
-                return AbsentLiveData.create()
+                sessionManager.cachedToken.value?.let { authToken ->
+                    blogRepository.searchBlogPost(
+                        authToken,
+                        viewState.value!!.blogFields.searchQuery
+                    )
+                }?: AbsentLiveData.create()
+
             }
 
             is None ->{
-                return AbsentLiveData.create()
+                AbsentLiveData.create()
             }
         }
     }
@@ -41,9 +50,9 @@ constructor(
 
     fun setQuery(query: String){
         val update = getCurrentViewStateOrNew()
-        if(query == update.blogFields.searchQuery){
-            return
-        }
+//        if(query == update.blogFields.searchQuery){
+//            return
+//        }
         update.blogFields.searchQuery = query
         _viewState.value = update
     }

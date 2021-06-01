@@ -2,6 +2,7 @@ package com.example.kotlin_jetpack_architecture.api.main
 
 import androidx.lifecycle.LiveData
 import com.example.kotlin_jetpack_architecture.api.GenericResponse
+import com.example.kotlin_jetpack_architecture.api.main.responses.BlogListSearchResponse
 import com.example.kotlin_jetpack_architecture.models.AccountProperties
 import com.example.kotlin_jetpack_architecture.util.GenericApiResponse
 import retrofit2.http.*
@@ -29,4 +30,12 @@ interface OpenApiMainService {
         @Field("new_password") newPassword: String,
         @Field("confirm_new_password") confirmNewPassword: String
     ): LiveData<GenericApiResponse<GenericResponse>>
+
+    @GET("blog/list")
+    fun searchListBlogPosts(
+        @Header("Authorization") authorization: String,
+        @Query("search") query: String
+    ): LiveData<GenericApiResponse<BlogListSearchResponse>>
+
+
 }

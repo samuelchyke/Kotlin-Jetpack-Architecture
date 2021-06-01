@@ -39,7 +39,7 @@ abstract class BaseBlogFragment : DaggerFragment(){
     fun cancelActiveJobs(){
         viewModel.cancelActiveJobs()
     }
-    
+
     fun setUpActionBarWithNavController(fragmentId : Int, activity: AppCompatActivity){
         val appBarConfiguration = AppBarConfiguration(setOf(fragmentId))
         NavigationUI.setupActionBarWithNavController(
