@@ -5,8 +5,10 @@ import com.example.kotlin_jetpack_architecture.models.AuthToken
 import com.example.kotlin_jetpack_architecture.repository.auth.AuthRepository
 import com.example.kotlin_jetpack_architecture.ui.BaseViewModel
 import com.example.kotlin_jetpack_architecture.ui.DataState
+import com.example.kotlin_jetpack_architecture.ui.Loading
 import com.example.kotlin_jetpack_architecture.ui.auth.state.*
 import com.example.kotlin_jetpack_architecture.ui.auth.state.AuthStateEvent.*
+import com.example.kotlin_jetpack_architecture.ui.main.blog.state.BlogViewState
 import com.example.kotlin_jetpack_architecture.util.AbsentLiveData
 import kotlinx.coroutines.InternalCoroutinesApi
 import javax.inject.Inject
@@ -43,13 +45,10 @@ constructor(
 
 
             is None ->{
-                return  object: LiveData<DataState<AuthViewState>>(){
+                return object : LiveData<DataState<AuthViewState>>() {
                     override fun onActive() {
                         super.onActive()
-                        value = DataState.data(
-                            null,
-                            null
-                        )
+                        value = DataState(null, Loading(false), null)
                     }
                 }
             }

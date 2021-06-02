@@ -6,9 +6,11 @@ import com.example.kotlin_jetpack_architecture.repository.main.AccountRepository
 import com.example.kotlin_jetpack_architecture.session.SessionManager
 import com.example.kotlin_jetpack_architecture.ui.BaseViewModel
 import com.example.kotlin_jetpack_architecture.ui.DataState
+import com.example.kotlin_jetpack_architecture.ui.Loading
 import com.example.kotlin_jetpack_architecture.ui.main.account.state.AccountStateEvent
 import com.example.kotlin_jetpack_architecture.ui.main.account.state.AccountStateEvent.*
 import com.example.kotlin_jetpack_architecture.ui.main.account.state.AccountViewState
+import com.example.kotlin_jetpack_architecture.ui.main.blog.state.BlogViewState
 import com.example.kotlin_jetpack_architecture.util.AbsentLiveData
 import kotlinx.coroutines.InternalCoroutinesApi
 import javax.inject.Inject
@@ -57,7 +59,12 @@ constructor(
                 }?: AbsentLiveData.create()
             }
             is None ->{
-                return AbsentLiveData.create()
+                return object : LiveData<DataState<AccountViewState>>() {
+                    override fun onActive() {
+                        super.onActive()
+                        value = DataState(null, Loading(false), null)
+                    }
+                }
             }
         }
     }

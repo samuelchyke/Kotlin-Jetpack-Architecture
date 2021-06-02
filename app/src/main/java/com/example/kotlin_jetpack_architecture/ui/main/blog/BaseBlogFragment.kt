@@ -12,6 +12,7 @@ import androidx.navigation.ui.NavigationUI
 import com.bumptech.glide.RequestManager
 import com.example.kotlin_jetpack_architecture.R
 import com.example.kotlin_jetpack_architecture.ui.DataStateChangeListener
+import com.example.kotlin_jetpack_architecture.ui.main.blog.viewmodel.BlogViewModel
 import com.example.kotlin_jetpack_architecture.viewmodels.ViewModelProviderFactory
 import dagger.android.support.DaggerFragment
 import javax.inject.Inject

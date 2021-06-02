@@ -12,14 +12,17 @@ import androidx.recyclerview.widget.RecyclerView
 import com.bumptech.glide.RequestManager
 import com.example.kotlin_jetpack_architecture.R
 import com.example.kotlin_jetpack_architecture.models.BlogPost
+import com.example.kotlin_jetpack_architecture.ui.DataState
 import com.example.kotlin_jetpack_architecture.ui.main.blog.state.BlogStateEvent
 import com.example.kotlin_jetpack_architecture.ui.main.blog.state.BlogStateEvent.*
+import com.example.kotlin_jetpack_architecture.ui.main.blog.state.BlogViewState
+import com.example.kotlin_jetpack_architecture.ui.main.blog.viewmodel.*
+import com.example.kotlin_jetpack_architecture.util.ErrorHandling
 import com.example.kotlin_jetpack_architecture.util.TopSpacingItemDecoration
 import kotlinx.android.synthetic.main.fragment_blog.*
 import javax.inject.Inject
 
 class BlogFragment : BaseBlogFragment(), BlogListAdapter.Interaction {
-
 
 
     private lateinit var recyclerAdapter: BlogListAdapter
@@ -36,43 +39,64 @@ class BlogFragment : BaseBlogFragment(), BlogListAdapter.Interaction {
         super.onViewCreated(view, savedInstanceState)
 
         subscribeObservers()
-        executeSearch()
         initRecyclerView()
+
+        if (savedInstanceState == null) {
+            viewModel.loadFirstPage()
+        }
     }
 
-    private fun executeSearch() {
-        viewModel.setQuery("")
-        viewModel.setStateEvent(BlogSearchEvent())
+    private fun handlePagination(dataState: DataState<BlogViewState>) {
+
+        // Handle incoming data from DataState
+        dataState.data?.let { data ->
+            data.data?.let { event ->
+                event.getContentIfNotHandled()?.let {
+                    viewModel.handleIncomingBlogListData(it)
+                }
+            }
+        }
+
+        // Check for pagination end (no more results)
+        // must do this b/c server will return an ApiErrorResponse if page is not valid,
+        // -> meaning there is no more data.
+        dataState.error?.let { event ->
+            event.peekContent().response.message?.let {
+                if (ErrorHandling.isPaginationDone(it)) {
+
+                    // handle the error message event so it doesn't display in UI
+                    event.getContentIfNotHandled()
+
+                    // set query exhausted to update RecyclerView with
+                    // "No more results..." list item
+                    viewModel.setQueryExhausted(true)
+                }
+            }
+        }
     }
 
     private fun subscribeObservers() {
         viewModel.dataState.observe(viewLifecycleOwner, { dataState ->
             if (dataState != null) {
+                // call before onDataStateChange to consume error if there is one
+                handlePagination(dataState)
                 stateChangeListener.onDataStateChange(dataState)
-                dataState.data?.let {
-                    it.data?.let { event ->
-                        event.getContentIfNotHandled()?.let {
-                            Log.d(TAG, "BlogFragment, DataState: $it")
-                            viewModel.setBlogListData(it.blogFields.blogList)
-                        }
-                    }
-                }
             }
         })
 
         viewModel.viewState.observe(viewLifecycleOwner, { viewState ->
             Log.d(TAG, "BlogFragment, ViewState: $viewState")
-            if(viewState != null){
+            if (viewState != null) {
                 recyclerAdapter.submitList(
                     viewState.blogFields.blogList,
-                    true
+                    viewState.blogFields.isQueryExhausted
                 )
             }
 
         })
     }
 
-    private fun initRecyclerView(){
+    private fun initRecyclerView() {
 
         blog_post_recyclerview.apply {
             layoutManager = LinearLayoutManager(this@BlogFragment.context)
@@ -80,8 +104,8 @@ class BlogFragment : BaseBlogFragment(), BlogListAdapter.Interaction {
             removeItemDecoration(topSpacingDecorator) // does nothing if not applied already
             addItemDecoration(topSpacingDecorator)
 
-            recyclerAdapter = BlogListAdapter(  this@BlogFragment, requestManager)
-            addOnScrollListener(object: RecyclerView.OnScrollListener(){
+            recyclerAdapter = BlogListAdapter(this@BlogFragment, requestManager)
+            addOnScrollListener(object : RecyclerView.OnScrollListener() {
 
                 override fun onScrollStateChanged(recyclerView: RecyclerView, newState: Int) {
                     super.onScrollStateChanged(recyclerView, newState)
@@ -89,7 +113,7 @@ class BlogFragment : BaseBlogFragment(), BlogListAdapter.Interaction {
                     val lastPosition = layoutManager.findLastVisibleItemPosition()
                     if (lastPosition == recyclerAdapter.itemCount.minus(1)) {
                         Log.d(TAG, "BlogFragment: attempting to load next page...")
-//                    TODO("load next page using ViewModel")
+                        viewModel.nextPage()
                     }
                 }
             })

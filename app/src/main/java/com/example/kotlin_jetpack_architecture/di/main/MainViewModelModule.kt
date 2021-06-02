@@ -3,7 +3,7 @@ package com.example.kotlin_jetpack_architecture.di.main
 import androidx.lifecycle.ViewModel
 import com.example.kotlin_jetpack_architecture.di.ViewModelKey
 import com.example.kotlin_jetpack_architecture.ui.main.account.AccountViewModel
-import com.example.kotlin_jetpack_architecture.ui.main.blog.BlogViewModel
+import com.example.kotlin_jetpack_architecture.ui.main.blog.viewmodel.BlogViewModel
 import dagger.Binds
 import dagger.Module
 import dagger.multibindings.IntoMap

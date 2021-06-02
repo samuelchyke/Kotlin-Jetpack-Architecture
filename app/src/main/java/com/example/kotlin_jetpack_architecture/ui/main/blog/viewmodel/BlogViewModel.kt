@@ -1,4 +1,4 @@
-package com.example.kotlin_jetpack_architecture.ui.main.blog
+package com.example.kotlin_jetpack_architecture.ui.main.blog.viewmodel
 
 import android.content.SharedPreferences
 import androidx.lifecycle.LiveData
@@ -8,6 +8,7 @@ import com.example.kotlin_jetpack_architecture.repository.main.BlogRepository
 import com.example.kotlin_jetpack_architecture.session.SessionManager
 import com.example.kotlin_jetpack_architecture.ui.BaseViewModel
 import com.example.kotlin_jetpack_architecture.ui.DataState
+import com.example.kotlin_jetpack_architecture.ui.Loading
 import com.example.kotlin_jetpack_architecture.ui.main.blog.state.BlogStateEvent
 import com.example.kotlin_jetpack_architecture.ui.main.blog.state.BlogStateEvent.*
 import com.example.kotlin_jetpack_architecture.ui.main.blog.state.BlogViewState
@@ -26,22 +27,28 @@ constructor(
 
     @InternalCoroutinesApi
     override fun handleStateEvent(stateEvent: BlogStateEvent): LiveData<DataState<BlogViewState>> {
-        return when(stateEvent){
+        return when (stateEvent) {
 
-            is BlogSearchEvent ->{
+            is BlogSearchEvent -> {
                 sessionManager.cachedToken.value?.let { authToken ->
                     blogRepository.searchBlogPost(
                         authToken,
-                        viewState.value!!.blogFields.searchQuery
+                        getSearchQuery(),
+                        getPage()
                     )
-                }?: AbsentLiveData.create()
+                } ?: AbsentLiveData.create()
 
             }
-            is CheckAuthorOfBlogPost ->{
+            is CheckAuthorOfBlogPost -> {
                 AbsentLiveData.create()
             }
-            is None ->{
-                AbsentLiveData.create()
+            is None -> {
+                return object : LiveData<DataState<BlogViewState>>() {
+                    override fun onActive() {
+                        super.onActive()
+                        value = DataState(null, Loading(false), null)
+                    }
+                }
             }
         }
     }
@@ -56,24 +63,6 @@ constructor(
 //            return
 //        }
         update.blogFields.searchQuery = query
-        _viewState.value = update
-    }
-
-    fun setBlogListData(blogList: List<BlogPost>){
-        val update = getCurrentViewStateOrNew()
-        update.blogFields.blogList = blogList
-        _viewState.value = update
-    }
-
-    fun setBlogPost(blogPost: BlogPost){
-        val update = getCurrentViewStateOrNew()
-        update.viewBlogFields.blogPost = blogPost
-        _viewState.value = update
-    }
-
-    fun setIsAuthorOfBlogPost(isAuthorOfBlogPost: Boolean){
-        val update = getCurrentViewStateOrNew()
-        update.viewBlogFields.isAuthorOfBlogPost = isAuthorOfBlogPost
         _viewState.value = update
     }
 
