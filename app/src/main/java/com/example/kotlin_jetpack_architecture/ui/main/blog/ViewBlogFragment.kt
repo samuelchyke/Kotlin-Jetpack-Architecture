@@ -2,8 +2,14 @@ package com.example.kotlin_jetpack_architecture.ui.main.blog
 
 import android.os.Bundle
 import android.view.*
+import androidx.lifecycle.Observer
 import androidx.navigation.fragment.findNavController
+import com.bumptech.glide.load.resource.drawable.DrawableTransitionOptions
 import com.example.kotlin_jetpack_architecture.R
+import com.example.kotlin_jetpack_architecture.models.BlogPost
+import com.example.kotlin_jetpack_architecture.util.DateUtils
+import kotlinx.android.synthetic.main.fragment_view_blog.*
+import kotlinx.android.synthetic.main.layout_blog_list_item.view.*
 
 class ViewBlogFragment : BaseBlogFragment(){
 
@@ -19,6 +25,30 @@ class ViewBlogFragment : BaseBlogFragment(){
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         setHasOptionsMenu(true)
+        subscribeObservers()
+    }
+
+    private fun subscribeObservers(){
+        viewModel.dataState.observe(viewLifecycleOwner, { dataState ->
+            stateChangeListener.onDataStateChange(dataState)
+        })
+
+        viewModel.viewState.observe(viewLifecycleOwner, { viewState ->
+            viewState.viewBlogFields.blogPost?.let{ blogPost ->
+                setBlogProperties(blogPost)
+            }
+        })
+    }
+
+    private fun setBlogProperties(blogPost: BlogPost){
+        requestManager
+            .load(blogPost.image)
+            .into(blog_image)
+
+        blog_title.text = blogPost.title
+        blog_author.text = blogPost.username
+        blog_update_date.text = DateUtils.convertLongToStringDate(blogPost.date_updated)
+        blog_body.text = blogPost.body
     }
 
     override fun onCreateOptionsMenu(menu: Menu, inflater: MenuInflater) {
