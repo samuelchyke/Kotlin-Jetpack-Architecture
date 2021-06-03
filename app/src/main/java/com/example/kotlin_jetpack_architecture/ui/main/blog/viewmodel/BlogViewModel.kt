@@ -4,6 +4,7 @@ import android.content.SharedPreferences
 import androidx.lifecycle.LiveData
 import com.bumptech.glide.RequestManager
 import com.example.kotlin_jetpack_architecture.models.BlogPost
+import com.example.kotlin_jetpack_architecture.persistence.BlogQueryUtils
 import com.example.kotlin_jetpack_architecture.repository.main.BlogRepository
 import com.example.kotlin_jetpack_architecture.session.SessionManager
 import com.example.kotlin_jetpack_architecture.ui.BaseViewModel
@@ -13,6 +14,8 @@ import com.example.kotlin_jetpack_architecture.ui.main.blog.state.BlogStateEvent
 import com.example.kotlin_jetpack_architecture.ui.main.blog.state.BlogStateEvent.*
 import com.example.kotlin_jetpack_architecture.ui.main.blog.state.BlogViewState
 import com.example.kotlin_jetpack_architecture.util.AbsentLiveData
+import com.example.kotlin_jetpack_architecture.util.PreferenceKeys.Companion.BLOG_FILTER
+import com.example.kotlin_jetpack_architecture.util.PreferenceKeys.Companion.BLOG_ORDER
 import kotlinx.coroutines.InternalCoroutinesApi
 import javax.inject.Inject
 
@@ -22,8 +25,23 @@ constructor(
     private val sessionManager: SessionManager,
     private val blogRepository: BlogRepository,
     private val sharedPreferences: SharedPreferences,
-    private val requestManager: RequestManager
+    private val editor: SharedPreferences.Editor
 ): BaseViewModel<BlogStateEvent, BlogViewState>(){
+
+
+    init {
+        setBlogFilter(
+            sharedPreferences.getString(
+                BLOG_FILTER,
+                BlogQueryUtils.BLOG_FILTER_DATE_UPDATED
+            )
+        )
+        sharedPreferences.getString(
+            BLOG_ORDER,
+            BlogQueryUtils.BLOG_ORDER_ASC
+        )
+    }
+
 
     @InternalCoroutinesApi
     override fun handleStateEvent(stateEvent: BlogStateEvent): LiveData<DataState<BlogViewState>> {
@@ -34,6 +52,7 @@ constructor(
                     blogRepository.searchBlogPost(
                         authToken,
                         getSearchQuery(),
+                        getOrder() + getFilter(),
                         getPage()
                     )
                 } ?: AbsentLiveData.create()
@@ -56,6 +75,15 @@ constructor(
     override fun initNewViewState(): BlogViewState {
         return BlogViewState()
     }
+
+    fun saveFilterOptions(filter: String, order: String){
+        editor.putString(BLOG_FILTER, filter)
+        editor.apply()
+
+        editor.putString(BLOG_ORDER, order)
+        editor.apply()
+    }
+
 
     fun setQuery(query: String){
         val update = getCurrentViewStateOrNew()

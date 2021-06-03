@@ -8,11 +8,13 @@ import com.example.kotlin_jetpack_architecture.api.main.responses.BlogListSearch
 import com.example.kotlin_jetpack_architecture.models.AuthToken
 import com.example.kotlin_jetpack_architecture.models.BlogPost
 import com.example.kotlin_jetpack_architecture.persistence.BlogPostDao
+import com.example.kotlin_jetpack_architecture.persistence.returnOrderedBlogQuery
 import com.example.kotlin_jetpack_architecture.repository.JobManager
 import com.example.kotlin_jetpack_architecture.repository.NetworkBoundResource
 import com.example.kotlin_jetpack_architecture.session.SessionManager
 import com.example.kotlin_jetpack_architecture.ui.DataState
 import com.example.kotlin_jetpack_architecture.ui.main.blog.state.BlogViewState
+import com.example.kotlin_jetpack_architecture.ui.main.blog.state.BlogViewState.*
 import com.example.kotlin_jetpack_architecture.util.ApiSuccessResponse
 import com.example.kotlin_jetpack_architecture.util.Constants.Companion.PAGINATION_PAGE_SIZE
 import com.example.kotlin_jetpack_architecture.util.DateUtils
@@ -35,6 +37,7 @@ constructor(
     fun searchBlogPost(
         authToken: AuthToken,
         query: String,
+        filterAndOrder: String,
         page: Int
     ): LiveData<DataState<BlogViewState>> {
         return object : NetworkBoundResource<BlogListSearchResponse, List<BlogPost>, BlogViewState>(
@@ -87,21 +90,23 @@ constructor(
                 return openApiMainService.searchListBlogPosts(
                     "Token ${authToken.token!!}",
                     query = query,
+                    ordering = filterAndOrder,
                     page = page
                 )
             }
 
             override fun loadFromCache(): LiveData<BlogViewState> {
-                return blogPostDao.getAllBlogPosts(
+
+                return blogPostDao.returnOrderedBlogQuery(
                     query = query,
-                    page = page
-                )
+                    filterAndOrder = filterAndOrder,
+                    page = page)
                     .switchMap {
-                        object : LiveData<BlogViewState>() {
+                        object: LiveData<BlogViewState>(){
                             override fun onActive() {
                                 super.onActive()
                                 value = BlogViewState(
-                                    BlogViewState.BlogFields(
+                                    BlogFields(
                                         blogList = it,
                                         isQueryInProgress = true
                                     )
@@ -110,6 +115,7 @@ constructor(
                         }
                     }
             }
+
 
             override suspend fun updateLocalDb(cacheObject: List<BlogPost>?) {
                 // loop through list and update the local db
