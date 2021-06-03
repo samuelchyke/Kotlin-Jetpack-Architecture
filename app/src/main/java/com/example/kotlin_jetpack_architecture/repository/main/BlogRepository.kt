@@ -3,6 +3,7 @@ package com.example.kotlin_jetpack_architecture.repository.main
 import android.util.Log
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.switchMap
+import com.example.kotlin_jetpack_architecture.api.GenericResponse
 import com.example.kotlin_jetpack_architecture.api.main.OpenApiMainService
 import com.example.kotlin_jetpack_architecture.api.main.responses.BlogListSearchResponse
 import com.example.kotlin_jetpack_architecture.models.AuthToken
@@ -15,10 +16,14 @@ import com.example.kotlin_jetpack_architecture.session.SessionManager
 import com.example.kotlin_jetpack_architecture.ui.DataState
 import com.example.kotlin_jetpack_architecture.ui.main.blog.state.BlogViewState
 import com.example.kotlin_jetpack_architecture.ui.main.blog.state.BlogViewState.*
+import com.example.kotlin_jetpack_architecture.util.AbsentLiveData
 import com.example.kotlin_jetpack_architecture.util.ApiSuccessResponse
 import com.example.kotlin_jetpack_architecture.util.Constants.Companion.PAGINATION_PAGE_SIZE
 import com.example.kotlin_jetpack_architecture.util.DateUtils
+import com.example.kotlin_jetpack_architecture.util.ErrorHandling.Companion.ERROR_UNKNOWN
 import com.example.kotlin_jetpack_architecture.util.GenericApiResponse
+import com.example.kotlin_jetpack_architecture.util.SuccessHandling.Companion.RESPONSE_HAS_PERMISSION_TO_EDIT
+import com.example.kotlin_jetpack_architecture.util.SuccessHandling.Companion.RESPONSE_NO_PERMISSION_TO_EDIT
 import kotlinx.coroutines.*
 import kotlinx.coroutines.Dispatchers.IO
 import javax.inject.Inject
@@ -152,5 +157,85 @@ constructor(
         }.asLiveData()
     }
 
+    @InternalCoroutinesApi
+    fun isAuthorOfBlogPost(
+        authToken: AuthToken,
+        slug: String
+    ): LiveData<DataState<BlogViewState>> {
+        return object: NetworkBoundResource<GenericResponse, Any, BlogViewState>(
+            sessionManager.isConnectedToTheInternet() == true,
+            true,
+            true,
+            false
+        ){
+
+
+            // not applicable
+            override suspend fun createCacheRequestAndReturn() {
+
+            }
+
+            override suspend fun handleApiSuccessResponse(response: ApiSuccessResponse<GenericResponse>) {
+                withContext(Dispatchers.Main){
+
+                    Log.d(TAG, "handleApiSuccessResponse: ${response.body.response}")
+                    when (response.body.response) {
+                        RESPONSE_NO_PERMISSION_TO_EDIT -> {
+                            onCompleteJob(
+                                DataState.data(
+                                    data = BlogViewState(
+                                        viewBlogFields = ViewBlogFields(
+                                            isAuthorOfBlogPost = false
+                                        )
+                                    ),
+                                    response = null
+                                )
+                            )
+                        }
+                        RESPONSE_HAS_PERMISSION_TO_EDIT -> {
+                            onCompleteJob(
+                                DataState.data(
+                                    data = BlogViewState(
+                                        viewBlogFields = ViewBlogFields(
+                                            isAuthorOfBlogPost = true
+                                        )
+                                    ),
+                                    response = null
+                                )
+                            )
+                        }
+                        else -> {
+                            onErrorReturn(ERROR_UNKNOWN, shouldUseDialog = false, shouldUseToast = false)
+                        }
+                    }
+                }
+            }
+
+            // not applicable
+            override fun loadFromCache(): LiveData<BlogViewState> {
+                return AbsentLiveData.create()
+            }
+
+            // Make an update and change nothing.
+            // If they are not the author it will return: "You don't have permission to edit that."
+            override fun createCall(): LiveData<GenericApiResponse<GenericResponse>> {
+                return openApiMainService.isAuthorOfBlogPost(
+                    "Token ${authToken.token!!}",
+                    slug
+                )
+            }
+
+            // not applicable
+            override suspend fun updateLocalDb(cacheObject: Any?) {
+
+            }
+
+            override fun setJob(job: Job) {
+                addJob("isAuthorOfBlogPost", job)
+            }
+
+
+        }.asLiveData()
+    }
 }
 

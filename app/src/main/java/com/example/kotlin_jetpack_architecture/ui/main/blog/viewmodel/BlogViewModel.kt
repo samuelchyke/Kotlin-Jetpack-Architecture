@@ -59,7 +59,12 @@ constructor(
 
             }
             is CheckAuthorOfBlogPost -> {
-                AbsentLiveData.create()
+                sessionManager.cachedToken.value?.let { authToken ->
+                    blogRepository.isAuthorOfBlogPost(
+                        authToken,
+                        slug = getSlug()
+                    )
+                } ?: AbsentLiveData.create()
             }
             is None -> {
                 return object : LiveData<DataState<BlogViewState>>() {
