@@ -1,5 +1,6 @@
 package com.example.kotlin_jetpack_architecture.ui.main.blog.viewmodel
 
+import android.net.Uri
 import com.example.kotlin_jetpack_architecture.models.BlogPost
 
 fun BlogViewModel.getSearchQuery(): String{
@@ -66,3 +67,11 @@ fun BlogViewModel.getDummyBlogPost(): BlogPost {
 
 }
 
+fun BlogViewModel.getUpdatedBlogUri(): Uri? {
+    getCurrentViewStateOrNew().let { blogViewState ->
+        blogViewState.updatedBlogFields.updatedImageUri?.let {
+            return it
+        }
+    }
+    return null
+}
