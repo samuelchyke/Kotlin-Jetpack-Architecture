@@ -156,9 +156,9 @@ class BlogFragment : BaseBlogFragment(), BlogListAdapter.Interaction, SwipeRefre
         viewModel.viewState.observe(viewLifecycleOwner, { viewState ->
             Log.d(TAG, "BlogFragment, ViewState: $viewState")
             if (viewState != null) {
-                recyclerAdapter.submitList(
-                    viewState.blogFields.blogList,
-                    viewState.blogFields.isQueryExhausted
+                recyclerAdapter.preLoadGlideImages(
+                    requestManager,
+                    viewState.blogFields.blogList
                 )
             }
 
