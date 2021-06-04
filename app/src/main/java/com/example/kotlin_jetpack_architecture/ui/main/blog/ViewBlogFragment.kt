@@ -1,17 +1,22 @@
 package com.example.kotlin_jetpack_architecture.ui.main.blog
 
 import android.os.Bundle
+import android.util.Log
 import android.view.*
+import androidx.core.net.toUri
 import androidx.lifecycle.Observer
 import androidx.navigation.fragment.findNavController
 import com.bumptech.glide.load.resource.drawable.DrawableTransitionOptions
 import com.example.kotlin_jetpack_architecture.R
 import com.example.kotlin_jetpack_architecture.models.BlogPost
+import com.example.kotlin_jetpack_architecture.ui.AreYouSureCallback
+import com.example.kotlin_jetpack_architecture.ui.UIMessage
+import com.example.kotlin_jetpack_architecture.ui.UIMessageType
 import com.example.kotlin_jetpack_architecture.ui.main.blog.state.BlogStateEvent
 import com.example.kotlin_jetpack_architecture.ui.main.blog.state.BlogStateEvent.*
-import com.example.kotlin_jetpack_architecture.ui.main.blog.viewmodel.isAuthorOfBlogPost
-import com.example.kotlin_jetpack_architecture.ui.main.blog.viewmodel.setIsAuthorOfBlogPost
+import com.example.kotlin_jetpack_architecture.ui.main.blog.viewmodel.*
 import com.example.kotlin_jetpack_architecture.util.DateUtils
+import com.example.kotlin_jetpack_architecture.util.SuccessHandling.Companion.SUCCESS_BLOG_DELETED
 import kotlinx.android.synthetic.main.fragment_view_blog.*
 import kotlinx.android.synthetic.main.layout_blog_list_item.view.*
 
@@ -46,7 +51,15 @@ class ViewBlogFragment : BaseBlogFragment(){
                 data.data?.getContentIfNotHandled()?.let{ viewState ->
                     viewState.viewBlogFields.isAuthorOfBlogPost
                 }
+                data.response?.peekContent()?.let{response ->
+                    if(response.message == SUCCESS_BLOG_DELETED){
+                        viewModel.removeDeletedBlogPost()
+                        findNavController().popBackStack()
+                    }
+                }
             }
+
+
         })
 
         viewModel.viewState.observe(viewLifecycleOwner, { viewState ->
@@ -63,6 +76,26 @@ class ViewBlogFragment : BaseBlogFragment(){
     fun deleteBlogPost(){
         viewModel.setStateEvent(
             DeleteBlogPostEvent()
+        )
+    }
+
+    fun confirmDeleteRequest(){
+        val callback: AreYouSureCallback = object: AreYouSureCallback {
+
+            override fun proceed() {
+                deleteBlogPost()
+            }
+
+            override fun cancel() {
+                // ignore
+            }
+
+        }
+        uiCommunicationListener.onUIMessageReceived(
+            UIMessage(
+                getString(R.string.are_you_sure_delete),
+                UIMessageType.AreYouSureDialog(callback)
+            )
         )
     }
 
@@ -110,6 +143,15 @@ class ViewBlogFragment : BaseBlogFragment(){
     }
 
     private fun navUpdateBlogFragment(){
+        try{
+            viewModel.setUpdatedBlogFields(
+                    viewModel.getBlogPost().title,
+                    viewModel.getBlogPost().body,
+                    viewModel.getBlogPost().image.toUri()
+                    )
+        }catch (e: Exception){
+            Log.e(TAG, "Exception:${e.message} ")
+        }
         findNavController().navigate(R.id.action_viewBlogFragment_to_updateBlogFragment)
     }
 }

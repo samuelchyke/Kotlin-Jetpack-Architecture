@@ -17,6 +17,8 @@ import com.example.kotlin_jetpack_architecture.util.AbsentLiveData
 import com.example.kotlin_jetpack_architecture.util.PreferenceKeys.Companion.BLOG_FILTER
 import com.example.kotlin_jetpack_architecture.util.PreferenceKeys.Companion.BLOG_ORDER
 import kotlinx.coroutines.InternalCoroutinesApi
+import okhttp3.MediaType
+import okhttp3.RequestBody
 import javax.inject.Inject
 
 class BlogViewModel
@@ -74,6 +76,29 @@ constructor(
                     )
                 } ?: AbsentLiveData.create()
 
+            }
+
+            is UpdateBlogPostEvent -> {
+                return sessionManager.cachedToken.value?.let { authToken ->
+
+                    val title = RequestBody.create(
+                        MediaType.parse("text/plain"),
+                        stateEvent.title
+                    )
+
+                    val body = RequestBody.create(
+                        MediaType.parse("text/plain"),
+                        stateEvent.body
+                    )
+
+                    blogRepository.updateBlogPost(
+                        authToken = authToken,
+                        slug = getSlug(),
+                        title = title,
+                        body = body,
+                        image = stateEvent.image
+                    )
+                }?: AbsentLiveData.create()
             }
 
             is None -> {

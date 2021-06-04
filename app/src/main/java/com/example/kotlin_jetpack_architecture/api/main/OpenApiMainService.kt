@@ -2,9 +2,12 @@ package com.example.kotlin_jetpack_architecture.api.main
 
 import androidx.lifecycle.LiveData
 import com.example.kotlin_jetpack_architecture.api.GenericResponse
+import com.example.kotlin_jetpack_architecture.api.main.responses.BlogCreateUpdateResponse
 import com.example.kotlin_jetpack_architecture.api.main.responses.BlogListSearchResponse
 import com.example.kotlin_jetpack_architecture.models.AccountProperties
 import com.example.kotlin_jetpack_architecture.util.GenericApiResponse
+import okhttp3.MultipartBody
+import okhttp3.RequestBody
 import retrofit2.http.*
 
 interface OpenApiMainService {
@@ -51,6 +54,14 @@ interface OpenApiMainService {
         @Path("slug") slug: String
     ): LiveData<GenericApiResponse<GenericResponse>>
 
-
+    @Multipart
+    @PUT("blog/{slug}/update")
+    fun updateBlog(
+        @Header("Authorization") authorization: String,
+        @Path("slug") slug: String,
+        @Part("title") title: RequestBody,
+        @Part("body") body: RequestBody,
+        @Part image: MultipartBody.Part?
+    ): LiveData<GenericApiResponse<BlogCreateUpdateResponse>>
 
 }

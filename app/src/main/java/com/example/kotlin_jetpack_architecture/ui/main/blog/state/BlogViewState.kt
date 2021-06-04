@@ -1,5 +1,6 @@
 package com.example.kotlin_jetpack_architecture.ui.main.blog.state
 
+import android.net.Uri
 import com.example.kotlin_jetpack_architecture.models.BlogPost
 
 import com.example.kotlin_jetpack_architecture.persistence.BlogQueryUtils.Companion.BLOG_ORDER_ASC
@@ -11,9 +12,10 @@ data class BlogViewState (
     var blogFields: BlogFields = BlogFields(),
 
     // ViewBlogFragment vars
-    var viewBlogFields: ViewBlogFields = ViewBlogFields()
+    var viewBlogFields: ViewBlogFields = ViewBlogFields(),
 
-    // ViewBlogFragment vars
+    // UpdateBlogFragment vars
+    var updatedBlogFields: UpdatedBlogFields = UpdatedBlogFields()
 
 )
 {
@@ -32,5 +34,10 @@ data class BlogViewState (
         var isAuthorOfBlogPost: Boolean = false
     )
 
+    data class UpdatedBlogFields(
+        var updatedBlogTitle: String? = null,
+        var updatedBlogBody: String? = null,
+        var updatedImageUri: Uri? = null
+    )
 
 }

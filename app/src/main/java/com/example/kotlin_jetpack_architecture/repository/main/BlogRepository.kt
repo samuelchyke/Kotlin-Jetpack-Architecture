@@ -5,6 +5,7 @@ import androidx.lifecycle.LiveData
 import androidx.lifecycle.switchMap
 import com.example.kotlin_jetpack_architecture.api.GenericResponse
 import com.example.kotlin_jetpack_architecture.api.main.OpenApiMainService
+import com.example.kotlin_jetpack_architecture.api.main.responses.BlogCreateUpdateResponse
 import com.example.kotlin_jetpack_architecture.api.main.responses.BlogListSearchResponse
 import com.example.kotlin_jetpack_architecture.models.AuthToken
 import com.example.kotlin_jetpack_architecture.models.BlogPost
@@ -29,6 +30,8 @@ import com.example.kotlin_jetpack_architecture.util.SuccessHandling.Companion.RE
 import com.example.kotlin_jetpack_architecture.util.SuccessHandling.Companion.SUCCESS_BLOG_DELETED
 import kotlinx.coroutines.*
 import kotlinx.coroutines.Dispatchers.IO
+import okhttp3.MultipartBody
+import okhttp3.RequestBody
 import javax.inject.Inject
 
 private val TAG: String = "AppDebug"
@@ -108,9 +111,10 @@ constructor(
                 return blogPostDao.returnOrderedBlogQuery(
                     query = query,
                     filterAndOrder = filterAndOrder,
-                    page = page)
+                    page = page
+                )
                     .switchMap {
-                        object: LiveData<BlogViewState>(){
+                        object : LiveData<BlogViewState>() {
                             override fun onActive() {
                                 super.onActive()
                                 value = BlogViewState(
@@ -165,12 +169,12 @@ constructor(
         authToken: AuthToken,
         slug: String
     ): LiveData<DataState<BlogViewState>> {
-        return object: NetworkBoundResource<GenericResponse, Any, BlogViewState>(
+        return object : NetworkBoundResource<GenericResponse, Any, BlogViewState>(
             sessionManager.isConnectedToTheInternet() == true,
             true,
             true,
             false
-        ){
+        ) {
 
 
             // not applicable
@@ -179,7 +183,7 @@ constructor(
             }
 
             override suspend fun handleApiSuccessResponse(response: ApiSuccessResponse<GenericResponse>) {
-                withContext(Dispatchers.Main){
+                withContext(Dispatchers.Main) {
 
                     Log.d(TAG, "handleApiSuccessResponse: ${response.body.response}")
                     when (response.body.response) {
@@ -208,7 +212,11 @@ constructor(
                             )
                         }
                         else -> {
-                            onErrorReturn(ERROR_UNKNOWN, shouldUseDialog = false, shouldUseToast = false)
+                            onErrorReturn(
+                                ERROR_UNKNOWN,
+                                shouldUseDialog = false,
+                                shouldUseToast = false
+                            )
                         }
                     }
                 }
@@ -245,13 +253,13 @@ constructor(
     fun deleteBlogPost(
         authToken: AuthToken,
         blogPost: BlogPost
-    ): LiveData<DataState<BlogViewState>>{
-        return object: NetworkBoundResource<GenericResponse, BlogPost, BlogViewState>(
+    ): LiveData<DataState<BlogViewState>> {
+        return object : NetworkBoundResource<GenericResponse, BlogPost, BlogViewState>(
             sessionManager.isConnectedToTheInternet() == true,
             true,
             false,
             true
-        ){
+        ) {
 
             // not applicable
             override suspend fun createCacheRequestAndReturn() {
@@ -260,10 +268,9 @@ constructor(
 
             override suspend fun handleApiSuccessResponse(response: ApiSuccessResponse<GenericResponse>) {
 
-                if(response.body.response == SUCCESS_BLOG_DELETED){
+                if (response.body.response == SUCCESS_BLOG_DELETED) {
                     updateLocalDb(blogPost)
-                }
-                else{
+                } else {
                     onCompleteJob(
                         DataState.error(
                             Response(
@@ -288,7 +295,7 @@ constructor(
             }
 
             override suspend fun updateLocalDb(cacheObject: BlogPost?) {
-                cacheObject?.let{blogPost ->
+                cacheObject?.let { blogPost ->
                     blogPostDao.deleteBlogPost(blogPost)
                     onCompleteJob(
                         DataState.data(
@@ -306,5 +313,83 @@ constructor(
         }.asLiveData()
     }
 
+    @InternalCoroutinesApi
+    fun updateBlogPost(
+        authToken: AuthToken,
+        slug: String,
+        title: RequestBody,
+        body: RequestBody,
+        image: MultipartBody.Part?
+    ): LiveData<DataState<BlogViewState>> {
+        return object : NetworkBoundResource<BlogCreateUpdateResponse, BlogPost, BlogViewState>(
+            sessionManager.isConnectedToTheInternet() == true,
+            true,
+            false,
+            true
+        ) {
+            override suspend fun createCacheRequestAndReturn() {
+                TODO("Not yet implemented")
+            }
+
+            override suspend fun handleApiSuccessResponse(response: ApiSuccessResponse<BlogCreateUpdateResponse>) {
+
+                val updatedBlogPost = BlogPost(
+                    response.body.pk,
+                    response.body.title,
+                    response.body.slug,
+                    response.body.body,
+                    response.body.image,
+                    DateUtils.convertServerStringDateToLong(response.body.date_updated),
+                    response.body.username
+                )
+
+                updateLocalDb(updatedBlogPost)
+
+                withContext(Dispatchers.Main){
+                    // finish with success response
+                    onCompleteJob(
+                        DataState.data(
+                            BlogViewState(
+                                viewBlogFields = ViewBlogFields(
+                                    blogPost = updatedBlogPost
+                                )
+                            ),
+                            Response(response.body.response, ResponseType.Toast())
+                        ))
+                }
+
+            }
+
+            override fun createCall(): LiveData<GenericApiResponse<BlogCreateUpdateResponse>> {
+                return openApiMainService.updateBlog(
+                    "Token ${authToken.token!!}",
+                    slug,
+                    title,
+                    body,
+                    image
+                )
+            }
+
+            override fun loadFromCache(): LiveData<BlogViewState> {
+                return AbsentLiveData.create()
+            }
+
+            override suspend fun updateLocalDb(cacheObject: BlogPost?) {
+                cacheObject?.let{blogPost ->
+                    blogPostDao.updateBlogPost(
+                        blogPost.pk,
+                        blogPost.title,
+                        blogPost.body,
+                        blogPost.image
+                    )
+                }
+            }
+
+            override fun setJob(job: Job) {
+                addJob("updateBlogPost", job)
+            }
+
+        }.asLiveData()
+    }
 }
 

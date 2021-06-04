@@ -12,6 +12,7 @@ import androidx.navigation.ui.NavigationUI
 import com.bumptech.glide.RequestManager
 import com.example.kotlin_jetpack_architecture.R
 import com.example.kotlin_jetpack_architecture.ui.DataStateChangeListener
+import com.example.kotlin_jetpack_architecture.ui.UICommunicationListener
 import com.example.kotlin_jetpack_architecture.ui.main.blog.viewmodel.BlogViewModel
 import com.example.kotlin_jetpack_architecture.viewmodels.ViewModelProviderFactory
 import dagger.android.support.DaggerFragment
@@ -27,8 +28,13 @@ abstract class BaseBlogFragment : DaggerFragment(){
     @Inject
     lateinit var providerFactory: ViewModelProviderFactory
 
+    lateinit var uiCommunicationListener :  UICommunicationListener
+
     lateinit var stateChangeListener: DataStateChangeListener
+
     lateinit var viewModel: BlogViewModel
+
+
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
@@ -61,6 +67,12 @@ abstract class BaseBlogFragment : DaggerFragment(){
             stateChangeListener = context as DataStateChangeListener
         }catch(e: ClassCastException){
             Log.e(TAG, "$context must implement DataStateChangeListener" )
+        }
+
+        try{
+            uiCommunicationListener = context as UICommunicationListener
+        }catch(e: ClassCastException){
+            Log.e(TAG, "$context must implement UICommunicationListener" )
         }
     }
 }

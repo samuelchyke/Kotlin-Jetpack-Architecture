@@ -1,6 +1,7 @@
 package com.example.kotlin_jetpack_architecture.ui.main.blog.viewmodel
 
 
+import android.net.Uri
 import com.example.kotlin_jetpack_architecture.models.BlogPost
 import com.example.kotlin_jetpack_architecture.ui.main.blog.viewmodel.BlogViewModel
 
@@ -55,3 +56,30 @@ fun BlogViewModel.setBlogOrder(order: String){
     update.blogFields.order = order
     setViewState(update)
 }
+
+fun BlogViewModel.removeDeletedBlogPost(){
+    val update = getCurrentViewStateOrNew()
+    val list = update.blogFields.blogList.toMutableList()
+    for(i in 0 until list.size - 1){
+        if(list[i]== getBlogPost()){
+            list.remove(getBlogPost())
+            break
+        }
+    }
+    setBlogListData(list)
+}
+
+fun BlogViewModel.setUpdatedBlogFields(title: String?, body: String?, uri: Uri?){
+    val update = getCurrentViewStateOrNew()
+    val updatedBlogFields = update.updatedBlogFields
+    title?.let{ updatedBlogFields.updatedBlogTitle = it }
+    body?.let{ updatedBlogFields.updatedBlogBody = it }
+    uri?.let{ updatedBlogFields.updatedImageUri = it }
+    update.updatedBlogFields = updatedBlogFields
+    setViewState(update)
+}
+
+
+
+
+
