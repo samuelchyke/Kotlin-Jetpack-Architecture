@@ -152,6 +152,7 @@ class ViewBlogFragment : BaseBlogFragment(){
         }catch (e: Exception){
             Log.e(TAG, "Exception:${e.message} ")
         }
+
         findNavController().navigate(R.id.action_viewBlogFragment_to_updateBlogFragment)
     }
 }
