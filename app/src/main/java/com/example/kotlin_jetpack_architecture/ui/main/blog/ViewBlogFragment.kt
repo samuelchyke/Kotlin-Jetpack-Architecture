@@ -33,6 +33,10 @@ class ViewBlogFragment : BaseBlogFragment(){
         subscribeObservers()
         stateChangeListener.expandAppBar()
 
+        delete_button.setOnClickListener {
+            deleteBlogPost()
+        }
+
     }
 
     private fun subscribeObservers(){
@@ -53,6 +57,13 @@ class ViewBlogFragment : BaseBlogFragment(){
                 }
             }
         })
+    }
+
+
+    fun deleteBlogPost(){
+        viewModel.setStateEvent(
+            DeleteBlogPostEvent()
+        )
     }
 
     private fun adaptViewToAuthorMode() {
@@ -82,6 +93,7 @@ class ViewBlogFragment : BaseBlogFragment(){
         if(viewModel.isAuthorOfBlogPost()){
               inflater.inflate(R.menu.edit_view_menu, menu)
         }
+        
     }
 
     override fun onOptionsItemSelected(item: MenuItem): Boolean {

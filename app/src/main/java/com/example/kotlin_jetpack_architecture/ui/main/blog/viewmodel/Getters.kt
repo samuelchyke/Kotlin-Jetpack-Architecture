@@ -1,5 +1,7 @@
 package com.example.kotlin_jetpack_architecture.ui.main.blog.viewmodel
 
+import com.example.kotlin_jetpack_architecture.models.BlogPost
+
 fun BlogViewModel.getSearchQuery(): String{
     getCurrentViewStateOrNew().let{
         return it.blogFields.searchQuery
@@ -49,5 +51,18 @@ fun BlogViewModel.isAuthorOfBlogPost(): Boolean{
     getCurrentViewStateOrNew().let {
         return it.viewBlogFields.isAuthorOfBlogPost
     }
+}
+
+fun BlogViewModel.getBlogPost(): BlogPost{
+    getCurrentViewStateOrNew().let {
+        return it.viewBlogFields.blogPost?.let{
+            return it
+        }?:getDummyBlogPost()
+    }
+}
+
+fun BlogViewModel.getDummyBlogPost(): BlogPost {
+    return BlogPost(-1,"","","","",-1, "")
+
 }
 
