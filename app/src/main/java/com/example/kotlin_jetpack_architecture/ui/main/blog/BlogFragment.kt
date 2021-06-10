@@ -37,7 +37,9 @@ import kotlinx.android.synthetic.main.fragment_blog.*
 import javax.inject.Inject
 
 private const val TAG = "AppDebug"
-class BlogFragment : BaseBlogFragment(), BlogListAdapter.Interaction, SwipeRefreshLayout.OnRefreshListener {
+class BlogFragment : BaseBlogFragment(),
+    BlogListAdapter.Interaction,
+    SwipeRefreshLayout.OnRefreshListener {
 
 
     private lateinit var recyclerAdapter: BlogListAdapter
@@ -57,7 +59,6 @@ class BlogFragment : BaseBlogFragment(), BlogListAdapter.Interaction, SwipeRefre
         (activity as AppCompatActivity).supportActionBar?.setDisplayShowTitleEnabled(false)
         setHasOptionsMenu(true)
         swipe_refresh.setOnRefreshListener(this)
-
 
         subscribeObservers()
         initRecyclerView()
@@ -156,10 +157,16 @@ class BlogFragment : BaseBlogFragment(), BlogListAdapter.Interaction, SwipeRefre
         viewModel.viewState.observe(viewLifecycleOwner, { viewState ->
             Log.d(TAG, "BlogFragment, ViewState: $viewState")
             if (viewState != null) {
-                recyclerAdapter.preLoadGlideImages(
-                    requestManager,
-                    viewState.blogFields.blogList
-                )
+                recyclerAdapter.apply {
+                    preloadGlideImages(
+                        requestManager = requestManager,
+                        list = viewState.blogFields.blogList
+                    )
+                    submitList(
+                        blogList = viewState.blogFields.blogList,
+                        isQueryExhausted = viewState.blogFields.isQueryExhausted
+                    )
+                }
             }
 
         })

@@ -124,20 +124,26 @@ private val requestManager: RequestManager
         return differ.currentList[position].pk
     }
 
-    fun submitList(blogList: List<BlogPost>?, isQueryExhausted: Boolean){
+    fun submitList(
+        blogList: List<BlogPost>?,
+        isQueryExhausted: Boolean){
         val newList = blogList?.toMutableList()
         if (isQueryExhausted)
             newList?.add(NO_MORE_RESULTS_BLOG_MARKER)
         differ.submitList(newList)
     }
 
-    fun preLoadGlideImages (requestManager: RequestManager, list: List<BlogPost>){
+    fun preloadGlideImages (
+        requestManager: RequestManager,
+        list: List<BlogPost>)
+    {
         for(blogPost in list){
             requestManager
                 .load(blogPost.image)
                 .preload()
         }
     }
+
     class BlogViewHolder
     constructor(
         itemView: View,
