@@ -9,6 +9,7 @@ import androidx.lifecycle.ViewModelProvider
 import androidx.navigation.fragment.findNavController
 import androidx.navigation.ui.AppBarConfiguration
 import androidx.navigation.ui.NavigationUI
+import com.bumptech.glide.RequestManager
 import com.example.kotlin_jetpack_architecture.R
 import com.example.kotlin_jetpack_architecture.ui.DataStateChangeListener
 import com.example.kotlin_jetpack_architecture.ui.UICommunicationListener
@@ -17,12 +18,15 @@ import com.example.kotlin_jetpack_architecture.viewmodels.ViewModelProviderFacto
 import dagger.android.support.DaggerFragment
 import javax.inject.Inject
 
-abstract class BaseCreateBlogFragment : DaggerFragment(){
+private const val TAG: String = "AppDebug"
 
-    val TAG: String = "AppDebug"
+abstract class BaseCreateBlogFragment : DaggerFragment(){
 
     @Inject
     lateinit var providerFactory: ViewModelProviderFactory
+
+    @Inject
+    lateinit var requestManager: RequestManager
 
     lateinit var stateChangeListener: DataStateChangeListener
 
