@@ -6,6 +6,7 @@ import com.example.kotlin_jetpack_architecture.persistence.AppDatabase
 import com.example.kotlin_jetpack_architecture.persistence.BlogPostDao
 import com.example.kotlin_jetpack_architecture.repository.main.AccountRepository
 import com.example.kotlin_jetpack_architecture.repository.main.BlogRepository
+import com.example.kotlin_jetpack_architecture.repository.main.CreateBlogRepository
 import com.example.kotlin_jetpack_architecture.session.SessionManager
 import dagger.Module
 import dagger.Provides
@@ -49,5 +50,14 @@ class MainModule {
         return BlogRepository(openApiMainService, blogPostDao, sessionManager)
     }
 
+    @MainScope
+    @Provides
+    fun provideCreateBlogRepository(
+        openApiMainService: OpenApiMainService,
+        blogPostDao: BlogPostDao,
+        sessionManager: SessionManager
+    ): CreateBlogRepository {
+        return CreateBlogRepository(openApiMainService, blogPostDao, sessionManager)
+    }
 }
 
