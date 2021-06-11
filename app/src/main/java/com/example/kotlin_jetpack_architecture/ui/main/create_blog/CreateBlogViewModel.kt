@@ -9,8 +9,12 @@ import com.example.kotlin_jetpack_architecture.ui.BaseViewModel
 import com.example.kotlin_jetpack_architecture.ui.DataState
 import com.example.kotlin_jetpack_architecture.ui.Loading
 import com.example.kotlin_jetpack_architecture.ui.main.create_blog.state.CreateBlogStateEvent
+import com.example.kotlin_jetpack_architecture.ui.main.create_blog.state.CreateBlogStateEvent.*
 import com.example.kotlin_jetpack_architecture.ui.main.create_blog.state.CreateBlogViewState
 import com.example.kotlin_jetpack_architecture.util.AbsentLiveData
+import kotlinx.coroutines.InternalCoroutinesApi
+import okhttp3.MediaType
+import okhttp3.RequestBody
 import javax.inject.Inject
 
 class CreateBlogViewModel
@@ -20,17 +24,29 @@ constructor(
     val sessionManager: SessionManager
 ): BaseViewModel<CreateBlogStateEvent, CreateBlogViewState>() {
 
+    @InternalCoroutinesApi
     override fun handleStateEvent(
         stateEvent: CreateBlogStateEvent
     ): LiveData<DataState<CreateBlogViewState>> {
 
         when(stateEvent){
 
-            is CreateBlogStateEvent.CreateNewBlogEvent -> {
-                return AbsentLiveData.create()
+            is CreateNewBlogEvent -> {
+                return sessionManager.cachedToken.value?.let { authToken ->
+
+                    val title = RequestBody.create(MediaType.parse("text/plain"), stateEvent.title)
+                    val body = RequestBody.create(MediaType.parse("text/plain"), stateEvent.body)
+
+                    createBlogRepository.createNewBlogPost(
+                        authToken,
+                        title,
+                        body,
+                        stateEvent.image
+                    )
+                }?: AbsentLiveData.create()
             }
 
-            is CreateBlogStateEvent.None -> {
+            is None -> {
                 return liveData {
                     emit(
                         DataState(
@@ -70,7 +86,7 @@ constructor(
     }
 
     fun handlePendingData(){
-        setStateEvent(CreateBlogStateEvent.None())
+        setStateEvent(None())
     }
 
     override fun onCleared() {

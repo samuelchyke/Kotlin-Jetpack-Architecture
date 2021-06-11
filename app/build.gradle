@@ -107,11 +107,11 @@ dependencies {
     implementation "androidx.navigation:navigation-ui-ktx:$nav_version"
     implementation "androidx.navigation:navigation-runtime-ktx:$nav_version"
 
-
+    // Material Version
     def material_version = "1.1.0-alpha09"
     implementation "com.google.android.material:material:$material_version"
 
-    // Material dialogs
+    // Material Dialogs
     def material_dialogs_version = "3.1.0"
     implementation "com.afollestad.material-dialogs:core:$material_dialogs_version"
 
@@ -127,12 +127,12 @@ dependencies {
     def recyclerview_version = "1.2.0"
     implementation "androidx.recyclerview:recyclerview:$recyclerview_version"
 
-    //glide
+    // Glide
     def glide_version = "4.12.0"
     implementation "com.github.bumptech.glide:glide:$glide_version"
     kapt "com.github.bumptech.glide:compiler:$glide_version"
 
-    //glide
+    // Android Image Cropper Version
     def android_image_cropper_version = "3.1.2"
     implementation "com.github.CanHub:Android-Image-Cropper:$android_image_cropper_version"
 }

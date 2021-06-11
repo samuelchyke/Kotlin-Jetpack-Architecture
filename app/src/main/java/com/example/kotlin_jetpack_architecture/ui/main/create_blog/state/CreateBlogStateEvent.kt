@@ -2,7 +2,6 @@ package com.example.kotlin_jetpack_architecture.ui.main.create_blog.state
 
 import okhttp3.MultipartBody
 
-
 sealed class CreateBlogStateEvent {
 
     data class CreateNewBlogEvent(

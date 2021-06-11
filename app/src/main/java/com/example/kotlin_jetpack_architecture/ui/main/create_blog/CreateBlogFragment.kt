@@ -1,6 +1,5 @@
 package com.example.kotlin_jetpack_architecture.ui.main.create_blog
 
-
 import android.app.Activity
 import android.content.ContentValues.TAG
 import android.content.Intent
@@ -8,17 +7,23 @@ import android.net.Uri
 import android.os.Bundle
 import android.provider.MediaStore
 import android.util.Log
-import android.view.LayoutInflater
-import android.view.View
-import android.view.ViewGroup
+import android.view.*
+import androidx.core.net.toFile
 import com.canhub.cropper.CropImage
 import com.canhub.cropper.CropImageView
 import com.example.kotlin_jetpack_architecture.R
 import com.example.kotlin_jetpack_architecture.ui.*
 import com.example.kotlin_jetpack_architecture.ui.main.blog.BaseCreateBlogFragment
+import com.example.kotlin_jetpack_architecture.ui.main.create_blog.state.CreateBlogStateEvent
 import com.example.kotlin_jetpack_architecture.util.Constants.Companion.GALLERY_REQUEST_CODE
+import com.example.kotlin_jetpack_architecture.util.ErrorHandling.Companion.ERROR_MUST_SELECT_IMAGE
 import com.example.kotlin_jetpack_architecture.util.ErrorHandling.Companion.ERROR_SOMETHING_WRONG_WITH_IMAGE
+import com.example.kotlin_jetpack_architecture.util.SuccessHandling.Companion.SUCCESS_BLOG_CREATED
 import kotlinx.android.synthetic.main.fragment_create_blog.*
+import okhttp3.MediaType
+import okhttp3.MultipartBody
+import okhttp3.RequestBody
+import java.io.File
 
 class CreateBlogFragment : BaseCreateBlogFragment(){
 
@@ -32,6 +37,8 @@ class CreateBlogFragment : BaseCreateBlogFragment(){
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
+
+        setHasOptionsMenu(true)
 
         blog_image.setOnClickListener {
             if(stateChangeListener.isStoragePermissionGranted()){
@@ -60,6 +67,17 @@ class CreateBlogFragment : BaseCreateBlogFragment(){
     fun subscribeObservers(){
         viewModel.dataState.observe(viewLifecycleOwner, { dataState ->
             stateChangeListener.onDataStateChange(dataState)
+            dataState.data?.let { data ->
+                data.response?.let { event ->
+                    event.peekContent().let { response ->
+                        response.message?.let { message ->
+                            if (message == SUCCESS_BLOG_CREATED) {
+                                viewModel.clearNewBlogFields()
+                            }
+                        }
+                    }
+                }
+            }
         })
 
         viewModel.viewState.observe(viewLifecycleOwner, { viewState ->
@@ -109,7 +127,7 @@ class CreateBlogFragment : BaseCreateBlogFragment(){
                     Log.d(TAG, "CROP: CROP_IMAGE_ACTIVITY_REQUEST_CODE")
                     val result = CropImage.getActivityResult(data)
                     val resultUri = result?.uriContent
-                    Log.d(TAG, "CROP: CROP_IMAGE_ACTIVITY_REQUEST_CODE: uri: ${resultUri}")
+                    Log.d(TAG, "CROP: CROP_IMAGE_ACTIVITY_REQUEST_CODE: uri: $resultUri")
                     viewModel.setNewBlogFields(
                         title = null,
                         body = null,
@@ -143,6 +161,42 @@ class CreateBlogFragment : BaseCreateBlogFragment(){
         )
     }
 
+    private fun publishNewBlog(){
+        var multipartBody: MultipartBody.Part? = null
+        viewModel.viewState.value?.blogFields?.newImageUri?.let{ imageUri ->
+            imageUri.path?.let{filePath ->
+                val imageFile = File(filePath)
+                Log.d(TAG, "CreateBlogFragment, imageFile: file: $imageFile")
+                val requestBody =
+                    RequestBody.create(
+                        MediaType.parse("image/*"),
+                        imageFile
+                    )
+                // name = field name in serializer
+                // filename = name of the image file
+                // requestBody = file with file type information
+                multipartBody = MultipartBody.Part.createFormData(
+                    "image",
+                    imageFile.name,
+                    requestBody
+                )
+            }
+        }
+
+        multipartBody?.let {
+
+            viewModel.setStateEvent(
+                CreateBlogStateEvent.CreateNewBlogEvent(
+                    blog_title.text.toString(),
+                    blog_body.text.toString(),
+                    it
+                )
+            )
+            stateChangeListener.hideSoftKeyBoard()
+        }?: showErrorDialog(ERROR_MUST_SELECT_IMAGE)
+
+    }
+
     override fun onPause() {
         super.onPause()
         viewModel.setNewBlogFields(
@@ -151,5 +205,36 @@ class CreateBlogFragment : BaseCreateBlogFragment(){
             null
         )
     }
+
+    override fun onCreateOptionsMenu(menu: Menu, inflater: MenuInflater) {
+        inflater.inflate(R.menu.publish_menu, menu)
+    }
+
+    override fun onOptionsItemSelected(item: MenuItem): Boolean {
+        when(item.itemId){
+            R.id.publish -> {
+                val callback: AreYouSureCallback = object: AreYouSureCallback {
+
+                    override fun proceed() {
+                        publishNewBlog()
+                    }
+
+                    override fun cancel() {
+                        // ignore
+                    }
+
+                }
+                uiCommunicationListener.onUIMessageReceived(
+                    UIMessage(
+                        getString(R.string.are_you_sure_publish),
+                        UIMessageType.AreYouSureDialog(callback)
+                    )
+                )
+                return true
+            }
+        }
+        return super.onOptionsItemSelected(item)
+    }
+
 
 }
