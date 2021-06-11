@@ -52,6 +52,7 @@ class CreateBlogFragment : BaseCreateBlogFragment(){
             }
         }
 
+
         subscribeObservers()
     }
 
